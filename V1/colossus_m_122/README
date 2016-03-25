@@ -1,0 +1,19 @@
+Colossus Model M Controller for 122
+==============================================
+
+Build
+-----
+
+To build the LUFA version, run the following command from this directory (keyboard/model_m_colossus/colossus_m_122):
+
+    make KEYMAP=m
+
+
+Clean
+-----
+
+    make clean
+
+
+
+

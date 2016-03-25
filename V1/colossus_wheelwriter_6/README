@@ -1,0 +1,20 @@
+Colossus Model M Controller for 84-key SSK
+==============================================
+
+Build
+-----
+
+To build the LUFA version, run the following command from this directory (keyboard/model_m_colossus/colossus_ssk):
+
+Example (Mac Specific):
+    make KEYMAP=ssk_mac
+
+
+Clean
+-----
+
+    make clean
+
+
+
+
