@@ -27,7 +27,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
  void led_set(uint8_t usb_led)
 {
-    /* output mode (DDR = 1) */
     DDR_CAPSLCK |= (1<<BIT_CAPSLCK);
     DDR_NUMLCK |= (1<<BIT_NUMLCK);
     DDR_SCROLLLCK |= (1<<BIT_SCROLLLCK);

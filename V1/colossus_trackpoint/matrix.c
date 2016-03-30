@@ -29,7 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 #ifndef DEBOUNCE
-#define DEBOUNCE	1
+  #define DEBOUNCE	0
 #endif
 static uint8_t debouncing = DEBOUNCE;
 

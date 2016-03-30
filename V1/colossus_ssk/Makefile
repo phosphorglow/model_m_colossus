@@ -39,7 +39,7 @@
 #----------------------------------------------------------------------------
 
 # Target file name (without extension).
-TARGET = colossus_ssk
+TARGET = colossus
 
 # Directory common source files exist
 TMK_DIR = ../../../../tmk_core

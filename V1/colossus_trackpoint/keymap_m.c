@@ -86,7 +86,9 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt)
             alt_mod = get_mods()&MODS_RALT_MASK;
             if (record->event.pressed) {
                 if (alt_mod) {
+		    del_mods(alt_mod);
   		    PORTB ^= _BV(PB0);
+		    add_mods(alt_mod);
                 } else {
                     del_mods(alt_mod);
                     add_key(KC_ESC);

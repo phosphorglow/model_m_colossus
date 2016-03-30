@@ -37,7 +37,7 @@
 #----------------------------------------------------------------------------
 
 # Target file name (without extension).
-TARGET = colossus_ssk
+TARGET = colossus
 
 # Directory common source files exist
 TMK_DIR = ../../../../tmk_core
@@ -118,10 +118,7 @@ OPT_DEFS += -DBOOTLOADER_SIZE=8192
 CONSOLE_ENABLE = yes	# Console for debug(+400)
 #COMMAND_ENABLE = yes    # Commands for debug and configuration
 SLEEP_LED_ENABLE = yes  # Breathing sleep LED during USB suspend
-#PS2_MOUSE_ENABLE = yes
 #NKRO_ENABLE = yes	# USB Nkey Rollover 
-
-#BLUEFRUIT_TRACE_SERIAL = true
 
 # Optimize size but this may cause error "relocation truncated to fit"
 #EXTRALDFLAGS = -Wl,--relax

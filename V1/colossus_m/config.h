@@ -50,19 +50,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /* #define BOOTMAGIC_KEY_SALT KC_Y */
 
 /* 
-CapsLock / NumLock / ScrolLock LED pin config combined 12FPC
+CapsLock / NumLock / ScrolLock LED pin config INTEGRATED 12FPC
 for LED.c
 PB4: -> NumLock LED 
 PB3: -> CapsLock LED
 PB2: -> ScrollLock LED
 
-CapsLock / NumLock / ScrolLock LED pin config separate 4pin FPC (reversed mounting)
+CapsLock / NumLock / ScrolLock LED pin config SEPARATE 4pin FPC (reversed mounting)
 for LED.c
 PB0: -> NumLock LED 
 PB2: -> CapsLock LED
 PB3: -> ScrollLock LED
 
-CapsLock / NumLock / ScrolLock LED pin config yellow wires with JST connector
+CapsLock / NumLock / ScrolLock LED pin config YELLOW wires with JST connector
 for LED.c
 PB2: -> NumLock LED 
 PB4: -> CapsLock LED
