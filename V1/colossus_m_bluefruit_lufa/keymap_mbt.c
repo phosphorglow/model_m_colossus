@@ -6,6 +6,8 @@
 #include <avr/io.h>
 #include "host.h"
 #include "bootloader.h"
+#include "host.h"
+#include "lufa.h"
 
 /* Phosphorglow's Layout
  * 
@@ -88,7 +90,7 @@ const uint8_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         TRNS, TRNS, TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS, TRNS, TRNS,  TRNS,  TRNS, TRNS,  TRNS,  TRNS, TRNS,        TRNS, TRNS, TRNS, TRNS,\
         TRNS, TRNS, TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS, TRNS, TRNS,  TRNS,  TRNS,        TRNS,  TRNS, TRNS,        TRNS, TRNS, TRNS, TRNS,\
         TRNS, TRNS, TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS, TRNS, TRNS,  TRNS,  TRNS,         				TRNS, TRNS, TRNS, TRNS,\
-        TRNS, TRNS, TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS, TRNS, TRNS,  TRNS,  TRNS,               TRNS,         	TRNS, TRNS, TRNS, TRNS,\
+        TRNS, TRNS, TRNS,TRNS,TRNS,TRNS,FN6, TRNS,TRNS,TRNS, TRNS, TRNS,  TRNS,  TRNS,               TRNS,         	TRNS, TRNS, TRNS, TRNS,\
         TRNS,       LGUI,                    TRNS,                 RGUI,         TRNS,        VOLD,  MUTE, VOLU,        TRNS, TRNS, TRNS, TRNS),  
           
     KEYMAP( \
@@ -109,6 +111,7 @@ enum function_id {
     SHIFT_NUM1, // Shift + Num -> Number Pad Layer Off
     BTPAIR, // LCTRL + RCTRL + PGUP -> BT Pair
     PAUS_BOOT, // Caps Lock + Right Shift + Pause = DFU
+    BTON,
 };
 
 void action_function(keyrecord_t *record, uint8_t id, uint8_t opt)
@@ -216,6 +219,39 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt)
                     send_keyboard_report();
                 }
             }
+            break;
+	    
+        // Caps Lock + Right Shift + B = Bluetooth
+        case BTON:
+            r_shift_mod = get_mods()&MODS_MASK_1;
+            if (record->event.pressed) {
+	      if (USB_DeviceState != DEVICE_STATE_Configured) {
+                if (r_shift_mod) {
+		    del_mods(r_shift_mod);
+		    send_keyboard_report();
+		    keyboard_init();
+		    DDRB   = _BV(PB0);
+		    PORTB |= _BV(PB0);
+	 
+		    host_set_driver(bluefruit_driver());
+	
+		    serial_init();
+
+ 		           while (1) {
+ 		               keyboard_task();
+ 		           }
+ 		           
+ 		    DDR_EXTRA_LAYER ^= (1<<BIT_EXTRA_LAYER); // turn fast charge back on.
+	     }
+                } else {
+                }
+            } else {
+                if (r_shift_mod) {                   
+                } else {
+                    del_key(KC_PAUS);
+                    send_keyboard_report();
+                }
+            }
             break;	    
     }
 };
@@ -227,4 +263,5 @@ const uint16_t PROGMEM fn_actions[] = {
    [3] = ACTION_LAYER_TAP_KEY(3, KC_CAPS),	// mouse and media etc.
    [4] = ACTION_LAYER_MOMENTARY(4),		// mouse and media etc. 
    [5] = ACTION_FUNCTION(PAUS_BOOT),		// DFU BOOTLOADER  
+   [6] = ACTION_FUNCTION(BTON),			// Caps+RShift+B, turn on Bluetooth while fast charging (attached to USB charger).
 };

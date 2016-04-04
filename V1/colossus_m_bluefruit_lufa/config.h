@@ -38,10 +38,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define DEBOUNCE    5
 
 /* A few tweaks to make the mousekeys slower and easier... */
-#define MOUSEKEY_TIME_TO_MAX 50
-#define MOUSEKEY_MAX_SPEED 6
+#define MOUSEKEY_TIME_TO_MAX 10
+#define MOUSEKEY_MAX_SPEED 5
 #define MOUSEKEY_WHEEL_MAX_SPEED 8
-#define MOUSEKEY_WHEEL_TIME_TO_MAX 60
+#define MOUSEKEY_WHEEL_TIME_TO_MAX 25
 
 /* Locking resynchronize hack 
 #define LOCKING_RESYNC_ENABLE

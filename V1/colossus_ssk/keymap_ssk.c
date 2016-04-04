@@ -126,6 +126,8 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt)
             r_shift_mod = get_mods()&MODS_RSHIFT_MASK;
             if (record->event.pressed) {
                 if (r_shift_mod) {
+		    del_mods(r_shift_mod);
+		    send_keyboard_report();
 		    bootloader_jump(); // JUMP TO DFU BOOTLOADER
                 } else {
                     del_mods(r_shift_mod); // remove shift

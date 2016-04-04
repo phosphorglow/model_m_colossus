@@ -69,7 +69,7 @@ PB2: -> ScrollLock LED
 
 #define DDR_ESC DDRB
 #define PORT_ESC PORTB
-#define BIT_ESC 4
+#define BIT_ESC 0
 
 /*
  * Feature disable options
