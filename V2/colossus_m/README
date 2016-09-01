@@ -1,0 +1,24 @@
+Colossus Model M Controller ver.2 for 101/102
+==============================================
+
+Build
+-----
+
+To build the LUFA version, run the following command from this directory (keyboard/model_m_colossus/V2/colossus_m):
+
+    make
+    $ make -f Makefile.(....)
+
+Or specify a keymap config:
+
+    make KEYMAP=pg
+
+
+Clean
+-----
+
+    make clean
+
+
+
+

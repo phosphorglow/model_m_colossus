@@ -1,0 +1,37 @@
+Colossus Model M Controller for 84-key SSK
+==============================================
+
+Had to modify tmk_keyboard-master/tmk_core/protocol/pjrc/usb.h:
+
+#elif defined(__AVR_AT90USB1286__)
+#define HW_CONFIG() (UHWCON = 0x81)
+//#define PLL_CONFIG() (PLLCSR = 0x16)
+#define PLL_CONFIG() (PLLCSR = 0x0E)
+#define USB_CONFIG() (USBCON = ((1<<USBE)|(1<<OTGPADE)))
+#define USB_FREEZE() (USBCON = ((1<<USBE)|(1<<FRZCLK)))
+#endif
+
+Different PLL_CONFIG for 1286 running at 8MHz.
+These were helpful to me:
+// http://cycle-planet.com/OT/mags/Elektor_Electronics_2010-01.pdf
+// https://github.com/arduino/Arduino/pull/3562/files#diff-c63b594b4e77f402bb58b66e523a373cL644
+
+
+
+Build
+-----
+
+To build the LUFA version, run the following command from this directory (keyboard/model_m_colossus/colossus_ssk):
+
+Example (Mac Specific):
+    make KEYMAP=ssk_mac
+
+
+Clean
+-----
+
+    make clean
+
+
+
+

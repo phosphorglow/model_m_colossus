@@ -47,7 +47,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /* salt key for magic command, M matrix won't handle space in combination */
 /* but I'm not entirely sure how to use this yet...                       */
-/* #define BOOTMAGIC_KEY_SALT KC_Y */
+/* #define BOOTMAGIC_KEY_SALT KC_LALT */
 
 /* 
 CapsLock / NumLock / ScrolLock LED pin config INTEGRATED 12FPC
@@ -55,20 +55,8 @@ for LED.c
 PB4: -> NumLock LED 
 PB3: -> CapsLock LED
 PB2: -> ScrollLock LED
-
-CapsLock / NumLock / ScrolLock LED pin config SEPARATE 4pin FPC (reversed mounting)
-for LED.c
-PB0: -> NumLock LED 
-PB2: -> CapsLock LED
-PB3: -> ScrollLock LED
-
-CapsLock / NumLock / ScrolLock LED pin config YELLOW wires with JST connector
-for LED.c
-PB2: -> NumLock LED 
-PB4: -> CapsLock LED
-PB3: -> ScrollLock LED
 */
-
+/*
 #define DDR_NUMLCK DDRB
 #define PORT_NUMLCK PORTB
 #define BIT_NUMLCK 4
@@ -80,6 +68,50 @@ PB3: -> ScrollLock LED
 #define DDR_SCROLLLCK DDRB
 #define PORT_SCROLLLCK PORTB
 #define BIT_SCROLLLCK 2
+*/
+
+/*
+CapsLock / NumLock / ScrolLock LED pin config SEPARATE 4pin FPC (reversed mounting)
+for LED.c
+PB0: -> NumLock LED 
+PB2: -> CapsLock LED
+PB3: -> ScrollLock LED
+*/
+
+#define DDR_NUMLCK DDRB
+#define PORT_NUMLCK PORTB
+#define BIT_NUMLCK 0
+
+#define DDR_CAPSLCK DDRB
+#define PORT_CAPSLCK PORTB
+#define BIT_CAPSLCK 2
+
+#define DDR_SCROLLLCK DDRB
+#define PORT_SCROLLLCK PORTB
+#define BIT_SCROLLLCK 3
+
+
+/*
+CapsLock / NumLock / ScrolLock LED pin config YELLOW wires with JST connector
+for LED.c
+PB2: -> NumLock LED 
+PB4: -> CapsLock LED
+PB3: -> ScrollLock LED
+*/
+/*
+#define DDR_NUMLCK DDRB
+#define PORT_NUMLCK PORTB
+#define BIT_NUMLCK 2
+
+#define DDR_CAPSLCK DDRB
+#define PORT_CAPSLCK PORTB
+#define BIT_CAPSLCK 4
+
+#define DDR_SCROLLLCK DDRB
+#define PORT_SCROLLLCK PORTB
+#define BIT_SCROLLLCK 3
+*/
+
 
 
 /*

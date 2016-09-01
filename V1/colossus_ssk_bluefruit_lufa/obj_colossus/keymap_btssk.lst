@@ -1,0 +1,1452 @@
+   1               		.file	"keymap_btssk.c"
+   2               	__SP_H__ = 0x3e
+   3               	__SP_L__ = 0x3d
+   4               	__SREG__ = 0x3f
+   5               	__RAMPZ__ = 0x3b
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+   8               		.text
+   9               	.Ltext0:
+  10               		.cfi_sections	.debug_frame
+  11               		.section	.text.action_function,"ax",@progbits
+  12               	.global	action_function
+  14               	action_function:
+  15               	.LFB10:
+  16               		.file 1 "keymap_btssk.c"
+   1:keymap_btssk.c **** #include "keymap_common.h"
+   2:keymap_btssk.c **** #include "led.h"
+   3:keymap_btssk.c **** #include "keyboard.h"
+   4:keymap_btssk.c **** #include "action_layer.h"
+   5:keymap_btssk.c **** #include <util/delay.h>
+   6:keymap_btssk.c **** #include <avr/io.h>
+   7:keymap_btssk.c **** #include "host.h"
+   8:keymap_btssk.c **** #include "bootloader.h"
+   9:keymap_btssk.c **** 
+  10:keymap_btssk.c **** /* Phosphorglow's Layout
+  11:keymap_btssk.c ****  * 
+  12:keymap_btssk.c ****  * Holding shift and pressing Scroll Lock/Number Lock enables/disables the integrated number pad.
+  13:keymap_btssk.c ****  * Pressing Scroll Lock/Number Lock without shift while the number pad is enabled switches between 
+  14:keymap_btssk.c ****  * and cursor keys by turning Number Lock on or off through the host OS.
+  15:keymap_btssk.c ****  * 
+  16:keymap_btssk.c ****  * Holding Right Control and pressing Page Up will put the bluefruit module into pairing mode.
+  17:keymap_btssk.c ****  * 
+  18:keymap_btssk.c ****  * Holding Caps Lock enables the mouse and media controls layer.
+  19:keymap_btssk.c ****  * 
+  20:keymap_btssk.c ****  * 
+  21:keymap_btssk.c ****  * Please excuse my lack of code etiquette/knowledge. It's probably messy. It could probably be
+  22:keymap_btssk.c ****  * done differently and neatly, but I'm not a programmer. I'm surprised I've figured out this much.
+  23:keymap_btssk.c ****  * 
+  24:keymap_btssk.c ****  */
+  25:keymap_btssk.c **** 
+  26:keymap_btssk.c **** const uint8_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
+  27:keymap_btssk.c ****     /* Keymap 0: Default Layer
+  28:keymap_btssk.c ****      * ,-------------------------------------------------------------------------------------.
+  29:keymap_btssk.c ****      * |Esc| | F1| F2| F3| F4|  |F5| F6| F7| F8|  |F9| F10| F11| F12|   PSCR|  SCRL|  PAUS|  |
+  30:keymap_btssk.c ****      * |-------------------------------------------------------------------------------------|
+  31:keymap_btssk.c ****      * |-------------------------------------------------------------------------------------|
+  32:keymap_btssk.c ****      * |`  |  1|  2|  3|  4|  5|  6|  7|  8|  9|  0|  -|  =|  Bspc\|	 INS|  HOME|  PGUP|  |
+  33:keymap_btssk.c ****      * |-------------------------------------------------------------------------------------|
+  34:keymap_btssk.c ****      * |Tab  |  Q|  W|  E|  R|  T|  Y|  U|  I|  O|  P|  [|  ]|    \|	 DEL|   END|  PGDN|  |
+  35:keymap_btssk.c ****      * |-------------------------------------------------------------------------------------|
+  36:keymap_btssk.c ****      * |Caps  |  A|  S|  D|  F|  G|  H|  J|  K|  L|  ;|  '|Return  |                         |
+  37:keymap_btssk.c ****      * |-------------------------------------------------------------------------------------|
+  38:keymap_btssk.c ****      * |Shift   |  Z|  X|  C|  V|  B|  N|  M|  ,|  .|  /|Shift     |	        UP |         |
+  39:keymap_btssk.c ****      * |-------------------------------------------------------------------------------------|
+  40:keymap_btssk.c ****      * |Ctrl|    |Alt |            Space          |Alt |    |Ctrl  |	LEFT| DOWN | RIGHT|  |
+  41:keymap_btssk.c ****      * `-------------------------------------------------------------------------------------'
+  42:keymap_btssk.c ****      */
+  43:keymap_btssk.c ****         /* Layer 2: Mouse and Media, etc. 
+  44:keymap_btssk.c ****         * ,-------------------------------------------------------------------------------------.
+  45:keymap_btssk.c ****         * |   | |   |   |   |   |  |  |   |   |   |  |  |MPLY|MPRV|MNXT|       |      |      |  |
+  46:keymap_btssk.c ****         * |-------------------------------------------------------------------------------------|
+  47:keymap_btssk.c ****         * |-------------------------------------------------------------------------------------|
+  48:keymap_btssk.c ****         * |   |   |   |   |   |   |   |   |   |   |   |   |   |       |	   BTN1|  MS_U|  BTN2|  |
+  49:keymap_btssk.c ****         * |-------------------------------------------------------------------------------------|
+  50:keymap_btssk.c ****         * |     |   |   |   |   |   |   |   |   |   |   |   |   |     |	   MS_L|  MS_D|  MS_R|  |
+  51:keymap_btssk.c ****         * |-------------------------------------------------------------------------------------|
+  52:keymap_btssk.c ****         * |    |    |    |    |   |   |   |   |   |   |   |   |       |                         |
+  53:keymap_btssk.c ****         * |-------------------------------------------------------------------------------------|
+  54:keymap_btssk.c ****         * |        |   |   |   |   |   |   |   |   |   |   |          |	              |         |
+  55:keymap_btssk.c ****         * |-------------------------------------------------------------------------------------|
+  56:keymap_btssk.c ****         * |    |    |    |                           |    |    |      |	   VOLD|  MUTE|  VOLU|  |
+  57:keymap_btssk.c ****         * `-------------------------------------------------------------------------------------'
+  58:keymap_btssk.c ****         */
+  59:keymap_btssk.c ****     
+  60:keymap_btssk.c ****     /* Keymap Template
+  61:keymap_btssk.c ****      * ,-------------------------------------------------------------------------------------.
+  62:keymap_btssk.c ****      * |   | |   |   |   |   |  |  |   |   |   |  |  |    |    |    |       |      |      |  |
+  63:keymap_btssk.c ****      * |-------------------------------------------------------------------------------------|
+  64:keymap_btssk.c ****      * |-------------------------------------------------------------------------------------|
+  65:keymap_btssk.c ****      * |   |   |   |   |   |   |   |   |   |   |   |   |   |       |	    |      |      |  |
+  66:keymap_btssk.c ****      * |-------------------------------------------------------------------------------------|
+  67:keymap_btssk.c ****      * |     |   |   |   |   |   |   |   |   |   |   |   |   |     |	    |      |      |  |
+  68:keymap_btssk.c ****      * |-------------------------------------------------------------------------------------|
+  69:keymap_btssk.c ****      * |      |   |   |   |   |   |   |   |   |   |   |   |        |                         |
+  70:keymap_btssk.c ****      * |-------------------------------------------------------------------------------------|
+  71:keymap_btssk.c ****      * |        |   |   |   |   |   |   |   |   |   |   |          |	           |         |
+  72:keymap_btssk.c ****      * |-------------------------------------------------------------------------------------|
+  73:keymap_btssk.c ****      * |    |    |    |                           |    |    |      |	    |      |      |  |
+  74:keymap_btssk.c ****      * `-------------------------------------------------------------------------------------'
+  75:keymap_btssk.c ****      */
+  76:keymap_btssk.c ****     
+  77:keymap_btssk.c ****     KEYMAP( \
+  78:keymap_btssk.c ****         /* Layer 0: Default */
+  79:keymap_btssk.c **** 	ESC,        F1,  F2,  F3,  F4,  F5,  F6,  F7,  F8,   F9,   F10,   F11,   F12,         PSCR,  FN0, 
+  80:keymap_btssk.c ****         GRV,  1,    2,   3,   4,   5,   6,   7,   8,   9,    0,    MINS,  EQL,   BSLS, BSPC,  INS, 
+  81:keymap_btssk.c ****         TAB,  Q,    W,   E,   R,   T,   Y,   U,   I,   O,    P,    LBRC,  RBRC,  BSLS,        DEL, 
+  82:keymap_btssk.c ****         FN3,  A,    S,   D,   F,   G,   H,   J,   K,   L,    SCLN, QUOT,  BSLS,  ENT, \
+  83:keymap_btssk.c ****         LSFT, NUBS, Z,   X,   C,   V,   B,   N,   M,   COMM, DOT,  SLSH,  RSFT,  RSFT,             
+  84:keymap_btssk.c ****         LCTL,       LALT,                    SPC,                  RALT,         RCTL,        LEFT,
+  85:keymap_btssk.c **** 
+  86:keymap_btssk.c **** 	/* Layer 1: Number Pad */        
+  87:keymap_btssk.c ****     KEYMAP( \
+  88:keymap_btssk.c ****         TRNS,       TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS, TRNS, TRNS,  TRNS,  TRNS,        TRNS,
+  89:keymap_btssk.c ****         TRNS, TRNS, TRNS,TRNS,TRNS,TRNS,TRNS,P7,  P8,  P9,   TRNS, PMNS,  PPLS,  TRNS, TRNS,  TRNS,
+  90:keymap_btssk.c ****         TRNS, TRNS, TRNS,TRNS,TRNS,TRNS,TRNS,P4,  P5,  P6,   TRNS, TRNS,  TRNS,  TRNS,        TRNS,
+  91:keymap_btssk.c ****         TRNS, TRNS, TRNS,TRNS,TRNS,TRNS,TRNS,P1,  P2,  P3,   PAST, TRNS,  TRNS,  PENT, \
+  92:keymap_btssk.c ****         TRNS, TRNS, TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,P0,  PCMM, PDOT, PSLS,  TRNS,  TRNS,             
+  93:keymap_btssk.c ****         TRNS,       TRNS,                    TRNS,                 TRNS,         TRNS,        TRNS,
+  94:keymap_btssk.c **** 
+  95:keymap_btssk.c ****     KEYMAP( \
+  96:keymap_btssk.c ****         TRNS,       TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS, TRNS, TRNS,  TRNS,  TRNS,        TRNS,
+  97:keymap_btssk.c ****         TRNS, TRNS, TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS, TRNS, TRNS,  TRNS,  TRNS, TRNS,  BTN1,
+  98:keymap_btssk.c ****         TRNS, TRNS, TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS, TRNS, TRNS,  TRNS,  TRNS,        MS_L,
+  99:keymap_btssk.c ****         TRNS, TRNS, TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS, TRNS, TRNS,  TRNS,  TRNS, \
+ 100:keymap_btssk.c ****         TRNS, TRNS, TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS, TRNS, TRNS,  TRNS,  TRNS,             
+ 101:keymap_btssk.c ****         TRNS,       TRNS,                    TRNS,                 TRNS,         FN4,         TRNS,
+ 102:keymap_btssk.c **** 
+ 103:keymap_btssk.c ****           /* Layer 3: Hold Caps Lock: Volume, Media, L/R GUI.  */
+ 104:keymap_btssk.c ****     KEYMAP( \
+ 105:keymap_btssk.c ****         TRNS,       TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS, TRNS, MPLY,  MPRV,  MNXT,        TRNS,
+ 106:keymap_btssk.c ****         TRNS, TRNS, TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS, TRNS, TRNS,  TRNS,  TRNS, TRNS,  TRNS,
+ 107:keymap_btssk.c ****         TRNS, TRNS, TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS, TRNS, TRNS,  TRNS,  TRNS,        TRNS,
+ 108:keymap_btssk.c ****         TRNS, TRNS, TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS, TRNS, TRNS,  TRNS,  TRNS, \
+ 109:keymap_btssk.c ****         TRNS, TRNS, TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS, TRNS, TRNS,  TRNS,  TRNS,             
+ 110:keymap_btssk.c ****         TRNS,       LGUI,                    TRNS,                 RGUI,         TRNS,        VOLD,
+ 111:keymap_btssk.c ****           
+ 112:keymap_btssk.c **** 	/* Layer 4: Mouse Scroll (Home/End when Right Control Held) */
+ 113:keymap_btssk.c ****     KEYMAP( \
+ 114:keymap_btssk.c ****         TRNS,       TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS, TRNS, TRNS,  TRNS,  TRNS,        TRNS,
+ 115:keymap_btssk.c ****         TRNS, TRNS, TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS, TRNS, TRNS,  TRNS,  TRNS, TRNS,  TRNS,
+ 116:keymap_btssk.c ****         TRNS, TRNS, TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS, TRNS, TRNS,  TRNS,  TRNS,        TRNS,
+ 117:keymap_btssk.c ****         TRNS, TRNS, TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS, TRNS, TRNS,  TRNS,  TRNS, \
+ 118:keymap_btssk.c ****         TRNS, TRNS, TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS, TRNS, TRNS,  TRNS,  TRNS,             
+ 119:keymap_btssk.c ****         TRNS,       TRNS,                    TRNS,                 TRNS,         TRNS,        TRNS,
+ 120:keymap_btssk.c **** };
+ 121:keymap_btssk.c **** 
+ 122:keymap_btssk.c **** /*
+ 123:keymap_btssk.c **** * user defined action function
+ 124:keymap_btssk.c **** */
+ 125:keymap_btssk.c **** enum function_id {
+ 126:keymap_btssk.c ****     SHIFT_NUM, // Shift + SCRL -> Number Pad Layer On
+ 127:keymap_btssk.c ****     SHIFT_NUM1, // Shift + Num -> Number Pad Layer Off
+ 128:keymap_btssk.c ****     BTPAIR, // LCTRL + RCTRL + PGUP -> BT Pair
+ 129:keymap_btssk.c ****     PAUS_BOOT, // Caps Lock + Right Shift + Pause = DFU
+ 130:keymap_btssk.c **** };
+ 131:keymap_btssk.c **** 
+ 132:keymap_btssk.c **** void action_function(keyrecord_t *record, uint8_t id, uint8_t opt)
+ 133:keymap_btssk.c **** {
+  17               		.loc 1 133 0
+  18               		.cfi_startproc
+  19               	.LVL0:
+  20 0000 EF92      		push r14
+  21               	.LCFI0:
+  22               		.cfi_def_cfa_offset 3
+  23               		.cfi_offset 14, -2
+  24 0002 FF92      		push r15
+  25               	.LCFI1:
+  26               		.cfi_def_cfa_offset 4
+  27               		.cfi_offset 15, -3
+  28 0004 CF93      		push r28
+  29               	.LCFI2:
+  30               		.cfi_def_cfa_offset 5
+  31               		.cfi_offset 28, -4
+  32               	/* prologue: function */
+  33               	/* frame size = 0 */
+  34               	/* stack size = 3 */
+  35               	.L__stack_usage = 3
+  36 0006 7C01      		movw r14,r24
+  37 0008 C62F      		mov r28,r22
+ 134:keymap_btssk.c ****     if (record->event.pressed) dprint("P"); else dprint("R");
+  38               		.loc 1 134 0
+  39 000a FC01      		movw r30,r24
+  40 000c 9281      		ldd r25,Z+2
+  41 000e 8091 0000 		lds r24,debug_config
+  42               	.LVL1:
+  43 0012 9923      		tst r25
+  44 0014 01F0      		breq .L2
+  45               		.loc 1 134 0 is_stmt 0 discriminator 1
+  46 0016 80FF      		sbrs r24,0
+  47 0018 00C0      		rjmp .L3
+  48 001a 80E0      		ldi r24,lo8(__c.2281)
+  49 001c 90E0      		ldi r25,hi8(__c.2281)
+  50 001e 00C0      		rjmp .L34
+  51               	.L2:
+  52               		.loc 1 134 0 discriminator 2
+  53 0020 80FF      		sbrs r24,0
+  54 0022 00C0      		rjmp .L3
+  55               		.loc 1 134 0 discriminator 1
+  56 0024 80E0      		ldi r24,lo8(__c.2283)
+  57 0026 90E0      		ldi r25,hi8(__c.2283)
+  58               	.L34:
+  59 0028 0E94 0000 		call xputs
+  60               	.LVL2:
+  61               	.L3:
+ 135:keymap_btssk.c ****     if (record->tap.interrupted) dprint("i");
+  62               		.loc 1 135 0 is_stmt 1
+  63 002c F701      		movw r30,r14
+  64 002e 8581      		ldd r24,Z+5
+  65 0030 80FF      		sbrs r24,0
+  66 0032 00C0      		rjmp .L4
+  67               		.loc 1 135 0 is_stmt 0 discriminator 1
+  68 0034 8091 0000 		lds r24,debug_config
+  69 0038 80FF      		sbrs r24,0
+  70 003a 00C0      		rjmp .L4
+  71 003c 80E0      		ldi r24,lo8(__c.2285)
+  72 003e 90E0      		ldi r25,hi8(__c.2285)
+  73 0040 0E94 0000 		call xputs
+  74               	.LVL3:
+  75               	.L4:
+ 136:keymap_btssk.c **** 
+ 137:keymap_btssk.c **** #   define MODS_SHIFT_MASK   (MOD_BIT(KC_LSHIFT)|MOD_BIT(KC_RSHIFT))
+ 138:keymap_btssk.c ****     static uint8_t shift_mod;
+ 139:keymap_btssk.c **** #   define MODS_RCTRL_MASK   (MOD_BIT(KC_RCTRL))
+ 140:keymap_btssk.c ****     static uint8_t rctrl_mod;    
+ 141:keymap_btssk.c **** #   define MODS_MASK_1   (MOD_BIT(KC_RSHIFT))
+ 142:keymap_btssk.c ****     static uint8_t r_shift_mod;
+ 143:keymap_btssk.c ****     
+ 144:keymap_btssk.c ****     switch (id) {
+  76               		.loc 1 144 0 is_stmt 1
+  77 0044 C130      		cpi r28,lo8(1)
+  78 0046 01F0      		breq .L7
+  79 0048 00F0      		brlo .L6
+  80 004a C230      		cpi r28,lo8(2)
+  81 004c 01F4      		brne .+2
+  82 004e 00C0      		rjmp .L8
+  83 0050 C330      		cpi r28,lo8(3)
+  84 0052 01F0      		breq .+2
+  85 0054 00C0      		rjmp .L1
+  86 0056 00C0      		rjmp .L9
+  87               	.L6:
+  88               	.LBB16:
+ 145:keymap_btssk.c ****         // Shift + Scroll Lock -> Number Pad Layer On
+ 146:keymap_btssk.c ****         case SHIFT_NUM:
+ 147:keymap_btssk.c ****             shift_mod = get_mods()&MODS_SHIFT_MASK;
+  89               		.loc 1 147 0
+  90 0058 0E94 0000 		call get_mods
+  91               	.LVL4:
+  92 005c 8272      		andi r24,34
+  93 005e 9927      		clr r25
+  94 0060 8093 0000 		sts shift_mod.2287,r24
+ 148:keymap_btssk.c ****             if (record->event.pressed) {
+  95               		.loc 1 148 0
+  96 0064 F701      		movw r30,r14
+  97 0066 3281      		ldd r19,Z+2
+  98 0068 3323      		tst r19
+  99 006a 01F0      		breq .L10
+ 149:keymap_btssk.c ****                 if (shift_mod) {
+ 100               		.loc 1 149 0
+ 101 006c 8111      		cpse r24,__zero_reg__
+ 102 006e 00C0      		rjmp .L35
+ 103               	.L11:
+ 104               	.LBB17:
+ 150:keymap_btssk.c **** 		    layer_invert(1); // toggle number pad layer
+ 151:keymap_btssk.c **** 		    DDR_NUMLAYER ^= (1<<BIT_NUMLAYER);	    
+ 152:keymap_btssk.c ****                 } else {
+ 153:keymap_btssk.c ****                     del_mods(shift_mod); // remove shift
+ 105               		.loc 1 153 0
+ 106 0070 0E94 0000 		call del_mods
+ 107               	.LVL5:
+ 154:keymap_btssk.c ****                     layer_invert(2); // toggle number pad layer
+ 108               		.loc 1 154 0
+ 109 0074 82E0      		ldi r24,lo8(2)
+ 110 0076 0E94 0000 		call layer_invert
+ 111               	.LVL6:
+ 112 007a 00C0      		rjmp .L36
+ 113               	.L10:
+ 114               	.LBE17:
+ 155:keymap_btssk.c **** 		    //DDR_EXTRA_LAYER ^= (1<<BIT_EXTRA_LAYER);
+ 156:keymap_btssk.c **** 		    // ...because, come on, who uses scroll lock...?
+ 157:keymap_btssk.c **** 		    //add_key(KC_SLCK);
+ 158:keymap_btssk.c ****                     //send_keyboard_report(); // send Scroll Lock
+ 159:keymap_btssk.c ****                     add_mods(shift_mod); // return shift but not sent
+ 160:keymap_btssk.c ****                 }
+ 161:keymap_btssk.c ****             } else {
+ 162:keymap_btssk.c ****                 if (shift_mod) {
+ 115               		.loc 1 162 0
+ 116 007c 8111      		cpse r24,__zero_reg__
+ 117 007e 00C0      		rjmp .L1
+ 118 0080 00C0      		rjmp .L37
+ 119               	.L7:
+ 163:keymap_btssk.c ****                 } else {
+ 164:keymap_btssk.c ****                     //del_key(KC_SLCK);
+ 165:keymap_btssk.c ****                     send_keyboard_report();
+ 166:keymap_btssk.c ****                 }
+ 167:keymap_btssk.c ****             }
+ 168:keymap_btssk.c ****             break;
+ 169:keymap_btssk.c **** 	    
+ 170:keymap_btssk.c **** 	// Shift + Scroll Lock -> Number Pad Layer Off
+ 171:keymap_btssk.c ****         case SHIFT_NUM1:
+ 172:keymap_btssk.c ****             shift_mod = get_mods()&MODS_SHIFT_MASK;
+ 120               		.loc 1 172 0
+ 121 0082 0E94 0000 		call get_mods
+ 122               	.LVL7:
+ 123 0086 8272      		andi r24,34
+ 124 0088 9927      		clr r25
+ 125 008a 8093 0000 		sts shift_mod.2287,r24
+ 173:keymap_btssk.c ****             if (record->event.pressed) {
+ 126               		.loc 1 173 0
+ 127 008e F701      		movw r30,r14
+ 128 0090 3281      		ldd r19,Z+2
+ 129 0092 3323      		tst r19
+ 130 0094 01F0      		breq .L13
+ 174:keymap_btssk.c ****                 if (shift_mod) {
+ 131               		.loc 1 174 0
+ 132 0096 8823      		tst r24
+ 133 0098 01F0      		breq .L14
+ 134               	.L35:
+ 175:keymap_btssk.c **** 		    layer_invert(1); // toggle number pad layer
+ 135               		.loc 1 175 0
+ 136 009a 81E0      		ldi r24,lo8(1)
+ 137 009c 0E94 0000 		call layer_invert
+ 138               	.LVL8:
+ 176:keymap_btssk.c **** 		    DDR_NUMLAYER ^= (1<<BIT_NUMLAYER);
+ 139               		.loc 1 176 0
+ 140 00a0 84B1      		in r24,0x4
+ 141 00a2 98E0      		ldi r25,lo8(8)
+ 142 00a4 8927      		eor r24,r25
+ 143 00a6 84B9      		out 0x4,r24
+ 144 00a8 00C0      		rjmp .L1
+ 145               	.L14:
+ 146               	.LBB18:
+ 177:keymap_btssk.c ****                 } else {
+ 178:keymap_btssk.c ****                     del_mods(shift_mod); // remove shift
+ 147               		.loc 1 178 0
+ 148 00aa 0E94 0000 		call del_mods
+ 149               	.LVL9:
+ 179:keymap_btssk.c ****                     add_key(KC_NLCK);
+ 150               		.loc 1 179 0
+ 151 00ae 83E5      		ldi r24,lo8(83)
+ 152 00b0 90E0      		ldi r25,0
+ 153 00b2 0E94 0000 		call add_key
+ 154               	.LVL10:
+ 180:keymap_btssk.c ****                     send_keyboard_report(); // send Num Lock (toggles number pad in OS between numb
+ 155               		.loc 1 180 0
+ 156 00b6 0E94 0000 		call send_keyboard_report
+ 157               	.LVL11:
+ 158               	.L36:
+ 181:keymap_btssk.c ****                     add_mods(shift_mod); // return shift but not sent
+ 159               		.loc 1 181 0
+ 160 00ba 8091 0000 		lds r24,shift_mod.2287
+ 161               	.L39:
+ 162 00be 90E0      		ldi r25,0
+ 163               	/* epilogue start */
+ 164               	.LBE18:
+ 165               	.LBE16:
+ 182:keymap_btssk.c ****                 }
+ 183:keymap_btssk.c ****             } else {
+ 184:keymap_btssk.c ****                 if (shift_mod) {
+ 185:keymap_btssk.c ****                 } else {
+ 186:keymap_btssk.c ****                     del_key(KC_NLCK);
+ 187:keymap_btssk.c ****                     send_keyboard_report();
+ 188:keymap_btssk.c ****                 }
+ 189:keymap_btssk.c ****             }
+ 190:keymap_btssk.c ****             break;
+ 191:keymap_btssk.c **** 
+ 192:keymap_btssk.c **** 	// RCtrl + Page Up -> BT Pair
+ 193:keymap_btssk.c ****         case BTPAIR:
+ 194:keymap_btssk.c ****             rctrl_mod = get_mods()&MODS_RCTRL_MASK;
+ 195:keymap_btssk.c ****             if (record->event.pressed) {
+ 196:keymap_btssk.c ****                 if (rctrl_mod) {
+ 197:keymap_btssk.c **** 		      // 3V to pair pin on bluefruit for 5 seconds.
+ 198:keymap_btssk.c **** 		      DDR_BF_PAIRB |= (1<<BIT_BF_PAIRB);
+ 199:keymap_btssk.c **** 		      PORT_BF_PAIRB |= (1<<BIT_BF_PAIRB);
+ 200:keymap_btssk.c **** 		      _delay_ms(5000);
+ 201:keymap_btssk.c **** 		      DDR_BF_PAIRB &= ~(1<<BIT_BF_PAIRB);
+ 202:keymap_btssk.c **** 		      PORT_BF_PAIRB &= ~(1<<BIT_BF_PAIRB);
+ 203:keymap_btssk.c ****                 } else {
+ 204:keymap_btssk.c ****                     del_mods(rctrl_mod); // remove shift
+ 205:keymap_btssk.c ****                     add_key(KC_PGUP);
+ 206:keymap_btssk.c ****                     send_keyboard_report(); // send Page Up
+ 207:keymap_btssk.c ****                     add_mods(rctrl_mod); // return shift but not sent
+ 208:keymap_btssk.c ****                 }
+ 209:keymap_btssk.c ****             } else {
+ 210:keymap_btssk.c ****                 if (rctrl_mod) {
+ 211:keymap_btssk.c **** 		    del_key(KC_PGUP);
+ 212:keymap_btssk.c ****                     send_keyboard_report();
+ 213:keymap_btssk.c ****                 } else {
+ 214:keymap_btssk.c ****                     del_key(KC_PGUP);
+ 215:keymap_btssk.c ****                     send_keyboard_report();
+ 216:keymap_btssk.c ****                 }
+ 217:keymap_btssk.c ****             }
+ 218:keymap_btssk.c ****             break;
+ 219:keymap_btssk.c **** 	    
+ 220:keymap_btssk.c ****         // Caps Lock + Right Shift + Pause = DFU
+ 221:keymap_btssk.c ****         case PAUS_BOOT:
+ 222:keymap_btssk.c ****             r_shift_mod = get_mods()&MODS_MASK_1;
+ 223:keymap_btssk.c ****             if (record->event.pressed) {
+ 224:keymap_btssk.c ****                 if (r_shift_mod) {
+ 225:keymap_btssk.c **** 		    bootloader_jump(); // JUMP TO DFU BOOTLOADER
+ 226:keymap_btssk.c ****                 } else {
+ 227:keymap_btssk.c ****                 }
+ 228:keymap_btssk.c ****             } else {
+ 229:keymap_btssk.c ****                 if (r_shift_mod) {                   
+ 230:keymap_btssk.c ****                 } else {
+ 231:keymap_btssk.c ****                     del_key(KC_PAUS);
+ 232:keymap_btssk.c ****                     send_keyboard_report();
+ 233:keymap_btssk.c ****                 }
+ 234:keymap_btssk.c ****             }
+ 235:keymap_btssk.c ****             break;	    
+ 236:keymap_btssk.c ****     }
+ 237:keymap_btssk.c **** };
+ 166               		.loc 1 237 0
+ 167 00c0 CF91      		pop r28
+ 168               	.LVL12:
+ 169 00c2 FF90      		pop r15
+ 170 00c4 EF90      		pop r14
+ 171               	.LVL13:
+ 172               	.LBB27:
+ 173               	.LBB19:
+ 181:keymap_btssk.c ****                     add_mods(shift_mod); // return shift but not sent
+ 174               		.loc 1 181 0
+ 175 00c6 0C94 0000 		jmp add_mods
+ 176               	.LVL14:
+ 177               	.L13:
+ 178               	.LBE19:
+ 184:keymap_btssk.c ****                 if (shift_mod) {
+ 179               		.loc 1 184 0
+ 180 00ca 8111      		cpse r24,__zero_reg__
+ 181 00cc 00C0      		rjmp .L1
+ 182               	.LBB20:
+ 186:keymap_btssk.c ****                     del_key(KC_NLCK);
+ 183               		.loc 1 186 0
+ 184 00ce 83E5      		ldi r24,lo8(83)
+ 185 00d0 90E0      		ldi r25,0
+ 186 00d2 00C0      		rjmp .L38
+ 187               	.L8:
+ 188               	.LBE20:
+ 194:keymap_btssk.c ****             rctrl_mod = get_mods()&MODS_RCTRL_MASK;
+ 189               		.loc 1 194 0
+ 190 00d4 0E94 0000 		call get_mods
+ 191               	.LVL15:
+ 192 00d8 8071      		andi r24,16
+ 193 00da 9927      		clr r25
+ 194 00dc 8093 0000 		sts rctrl_mod.2288,r24
+ 195:keymap_btssk.c ****             if (record->event.pressed) {
+ 195               		.loc 1 195 0
+ 196 00e0 F701      		movw r30,r14
+ 197 00e2 3281      		ldd r19,Z+2
+ 198 00e4 3323      		tst r19
+ 199 00e6 01F0      		breq .L16
+ 196:keymap_btssk.c ****                 if (rctrl_mod) {
+ 200               		.loc 1 196 0
+ 201 00e8 8823      		tst r24
+ 202 00ea 01F0      		breq .L17
+ 198:keymap_btssk.c **** 		      DDR_BF_PAIRB |= (1<<BIT_BF_PAIRB);
+ 203               		.loc 1 198 0
+ 204 00ec 569A      		sbi 0xa,6
+ 199:keymap_btssk.c **** 		      PORT_BF_PAIRB |= (1<<BIT_BF_PAIRB);
+ 205               		.loc 1 199 0
+ 206 00ee 5E9A      		sbi 0xb,6
+ 207               	.LVL16:
+ 208               	.LBB21:
+ 209               	.LBB22:
+ 210               		.file 2 "/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h"
+   1:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** /* Copyright (c) 2002, Marek Michalkiewicz
+   2:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    Copyright (c) 2004,2005,2007 Joerg Wunsch
+   3:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    Copyright (c) 2007  Florin-Viorel Petrov
+   4:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    All rights reserved.
+   5:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+   6:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    Redistribution and use in source and binary forms, with or without
+   7:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    modification, are permitted provided that the following conditions are met:
+   8:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+   9:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    * Redistributions of source code must retain the above copyright
+  10:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****      notice, this list of conditions and the following disclaimer.
+  11:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  12:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    * Redistributions in binary form must reproduce the above copyright
+  13:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****      notice, this list of conditions and the following disclaimer in
+  14:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****      the documentation and/or other materials provided with the
+  15:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****      distribution.
+  16:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  17:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    * Neither the name of the copyright holders nor the names of
+  18:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****      contributors may be used to endorse or promote products derived
+  19:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****      from this software without specific prior written permission.
+  20:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  21:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  22:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  23:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  24:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****   ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+  25:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****   LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+  26:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****   CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+  27:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****   SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  28:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****   INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  29:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  30:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  31:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****   POSSIBILITY OF SUCH DAMAGE. */
+  32:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  33:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** /* $Id: delay.h.in 2251 2011-09-14 08:20:33Z joerg_wunsch $ */
+  34:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  35:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #ifndef _UTIL_DELAY_H_
+  36:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #define _UTIL_DELAY_H_ 1
+  37:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  38:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #ifndef __HAS_DELAY_CYCLES
+  39:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #define __HAS_DELAY_CYCLES 1
+  40:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #endif
+  41:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  42:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #include <inttypes.h>
+  43:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #include <util/delay_basic.h>
+  44:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #include <math.h>
+  45:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  46:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** /** \file */
+  47:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** /** \defgroup util_delay <util/delay.h>: Convenience functions for busy-wait delay loops
+  48:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     \code
+  49:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     #define F_CPU 1000000UL  // 1 MHz
+  50:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     //#define F_CPU 14.7456E6
+  51:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     #include <util/delay.h>
+  52:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     \endcode
+  53:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  54:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     \note As an alternative method, it is possible to pass the
+  55:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     F_CPU macro down to the compiler from the Makefile.
+  56:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     Obviously, in that case, no \c \#define statement should be
+  57:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     used.
+  58:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  59:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     The functions in this header file are wrappers around the basic
+  60:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     busy-wait functions from <util/delay_basic.h>.  They are meant as
+  61:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     convenience functions where actual time values can be specified
+  62:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     rather than a number of cycles to wait for.  The idea behind is
+  63:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     that compile-time constant expressions will be eliminated by
+  64:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     compiler optimization so floating-point expressions can be used
+  65:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     to calculate the number of delay cycles needed based on the CPU
+  66:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     frequency passed by the macro F_CPU.
+  67:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  68:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     \note In order for these functions to work as intended, compiler
+  69:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     optimizations <em>must</em> be enabled, and the delay time
+  70:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     <em>must</em> be an expression that is a known constant at
+  71:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     compile-time.  If these requirements are not met, the resulting
+  72:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     delay will be much longer (and basically unpredictable), and
+  73:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     applications that otherwise do not use floating-point calculations
+  74:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     will experience severe code bloat by the floating-point library
+  75:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     routines linked into the application.
+  76:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  77:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     The functions available allow the specification of microsecond, and
+  78:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     millisecond delays directly, using the application-supplied macro
+  79:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     F_CPU as the CPU clock frequency (in Hertz).
+  80:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  81:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** */
+  82:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  83:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #if !defined(__DOXYGEN__)
+  84:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** static inline void _delay_us(double __us) __attribute__((always_inline));
+  85:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** static inline void _delay_ms(double __ms) __attribute__((always_inline));
+  86:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #endif
+  87:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  88:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #ifndef F_CPU
+  89:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** /* prevent compiler error by supplying a default */
+  90:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** # warning "F_CPU not defined for <util/delay.h>"
+  91:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** # define F_CPU 1000000UL
+  92:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #endif
+  93:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  94:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #ifndef __OPTIMIZE__
+  95:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** # warning "Compiler optimizations disabled; functions from <util/delay.h> won't work as designed"
+  96:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #endif
+  97:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  98:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #if __HAS_DELAY_CYCLES && defined(__OPTIMIZE__) && \
+  99:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****   !defined(__DELAY_BACKWARD_COMPATIBLE__) &&	   \
+ 100:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****   __STDC_HOSTED__
+ 101:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #  include <math.h>
+ 102:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #endif
+ 103:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+ 104:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** /**
+ 105:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    \ingroup util_delay
+ 106:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+ 107:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    Perform a delay of \c __ms milliseconds, using _delay_loop_2().
+ 108:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+ 109:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    The macro F_CPU is supposed to be defined to a
+ 110:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    constant defining the CPU clock frequency (in Hertz).
+ 111:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+ 112:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    The maximal possible delay is 262.14 ms / F_CPU in MHz.
+ 113:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+ 114:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    When the user request delay which exceed the maximum possible one,
+ 115:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    _delay_ms() provides a decreased resolution functionality. In this
+ 116:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    mode _delay_ms() will work with a resolution of 1/10 ms, providing
+ 117:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    delays up to 6.5535 seconds (independent from CPU frequency).  The
+ 118:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    user will not be informed about decreased resolution.
+ 119:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+ 120:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    If the avr-gcc toolchain has __builtin_avr_delay_cycles(unsigned long)
+ 121:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    support, maximal possible delay is 4294967.295 ms/ F_CPU in MHz. For
+ 122:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    values greater than the maximal possible delay, overflows results in
+ 123:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    no delay i.e., 0ms.
+ 124:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+ 125:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    Conversion of __us into clock cycles may not always result in integer.
+ 126:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    By default, the clock cycles rounded up to next integer. This ensures that
+ 127:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    the user gets atleast __us microseconds of delay.
+ 128:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+ 129:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    Alternatively, user can define __DELAY_ROUND_DOWN__ and __DELAY_ROUND_CLOSEST__
+ 130:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    to round down and round to closest integer.
+ 131:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+ 132:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    Note: The new implementation of _delay_ms(double __ms) with 
+ 133:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     __builtin_avr_delay_cycles(unsigned long) support is not backward compatible. 
+ 134:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    User can define __DELAY_BACKWARD_COMPATIBLE__ to get a backward compatible delay.
+ 135:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    Also, the backward compatible
+ 136:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    algorithm will be chosen if the code is compiled in a <em>freestanding
+ 137:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    environment</em> (GCC option \c -ffreestanding), as the math functions
+ 138:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    required for rounding are not available to the compiler then.
+ 139:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+ 140:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****  */
+ 141:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** void
+ 142:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** _delay_ms(double __ms)
+ 143:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** {
+ 144:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 	uint16_t __ticks;
+ 145:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 	double __tmp ; 
+ 146:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #if __HAS_DELAY_CYCLES && defined(__OPTIMIZE__) && \
+ 147:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****   !defined(__DELAY_BACKWARD_COMPATIBLE__) &&	   \
+ 148:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****   __STDC_HOSTED__
+ 149:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 	uint32_t __ticks_dc;
+ 150:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 	extern void __builtin_avr_delay_cycles(unsigned long);
+ 151:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 	__tmp = ((F_CPU) / 1e3) * __ms;
+ 152:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+ 153:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 	#if defined(__DELAY_ROUND_DOWN__)
+ 154:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 		__ticks_dc = (uint32_t)fabs(__tmp);
+ 155:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+ 156:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 	#elif defined(__DELAY_ROUND_CLOSEST__)
+ 157:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 		__ticks_dc = (uint32_t)(fabs(__tmp)+0.5);
+ 158:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+ 159:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 	#else
+ 160:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 		//round up by default
+ 161:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+ 162:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 	#endif
+ 163:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+ 164:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 	__builtin_avr_delay_cycles(__ticks_dc);
+ 211               		.loc 2 164 0
+ 212 00f0 FFEF      		ldi r31,lo8(7999999)
+ 213 00f2 21E1      		ldi r18,hi8(7999999)
+ 214 00f4 8AE7      		ldi r24,hlo8(7999999)
+ 215 00f6 F150      		1: subi r31,1
+ 216 00f8 2040      		sbci r18,0
+ 217 00fa 8040      		sbci r24,0
+ 218 00fc 01F4      		brne 1b
+ 219 00fe 00C0      		rjmp .
+ 220 0100 0000      		nop
+ 221               	.LBE22:
+ 222               	.LBE21:
+ 201:keymap_btssk.c **** 		      DDR_BF_PAIRB &= ~(1<<BIT_BF_PAIRB);
+ 223               		.loc 1 201 0
+ 224 0102 5698      		cbi 0xa,6
+ 202:keymap_btssk.c **** 		      PORT_BF_PAIRB &= ~(1<<BIT_BF_PAIRB);
+ 225               		.loc 1 202 0
+ 226 0104 5E98      		cbi 0xb,6
+ 227 0106 00C0      		rjmp .L1
+ 228               	.LVL17:
+ 229               	.L17:
+ 230               	.LBB23:
+ 204:keymap_btssk.c ****                     del_mods(rctrl_mod); // remove shift
+ 231               		.loc 1 204 0
+ 232 0108 0E94 0000 		call del_mods
+ 233               	.LVL18:
+ 205:keymap_btssk.c ****                     add_key(KC_PGUP);
+ 234               		.loc 1 205 0
+ 235 010c 8BE4      		ldi r24,lo8(75)
+ 236 010e 90E0      		ldi r25,0
+ 237 0110 0E94 0000 		call add_key
+ 238               	.LVL19:
+ 206:keymap_btssk.c ****                     send_keyboard_report(); // send Page Up
+ 239               		.loc 1 206 0
+ 240 0114 0E94 0000 		call send_keyboard_report
+ 241               	.LVL20:
+ 207:keymap_btssk.c ****                     add_mods(rctrl_mod); // return shift but not sent
+ 242               		.loc 1 207 0
+ 243 0118 8091 0000 		lds r24,rctrl_mod.2288
+ 244 011c 00C0      		rjmp .L39
+ 245               	.L16:
+ 246               	.LBE23:
+ 247               	.LBB24:
+ 211:keymap_btssk.c **** 		    del_key(KC_PGUP);
+ 248               		.loc 1 211 0
+ 249 011e 8BE4      		ldi r24,lo8(75)
+ 250 0120 90E0      		ldi r25,0
+ 251 0122 00C0      		rjmp .L38
+ 252               	.L9:
+ 253               	.LBE24:
+ 222:keymap_btssk.c ****             r_shift_mod = get_mods()&MODS_MASK_1;
+ 254               		.loc 1 222 0
+ 255 0124 0E94 0000 		call get_mods
+ 256               	.LVL21:
+ 257 0128 8072      		andi r24,32
+ 258 012a 9927      		clr r25
+ 259 012c 982F      		mov r25,r24
+ 260 012e 8093 0000 		sts r_shift_mod.2289,r24
+ 223:keymap_btssk.c ****             if (record->event.pressed) {
+ 261               		.loc 1 223 0
+ 262 0132 F701      		movw r30,r14
+ 263 0134 8281      		ldd r24,Z+2
+ 264 0136 8823      		tst r24
+ 265 0138 01F0      		breq .L18
+ 224:keymap_btssk.c ****                 if (r_shift_mod) {
+ 266               		.loc 1 224 0
+ 267 013a 9923      		tst r25
+ 268 013c 01F0      		breq .L1
+ 269               	/* epilogue start */
+ 270               	.LBE27:
+ 271               		.loc 1 237 0
+ 272 013e CF91      		pop r28
+ 273               	.LVL22:
+ 274 0140 FF90      		pop r15
+ 275 0142 EF90      		pop r14
+ 276               	.LVL23:
+ 277               	.LBB28:
+ 225:keymap_btssk.c **** 		    bootloader_jump(); // JUMP TO DFU BOOTLOADER
+ 278               		.loc 1 225 0
+ 279 0144 0C94 0000 		jmp bootloader_jump
+ 280               	.LVL24:
+ 281               	.L18:
+ 229:keymap_btssk.c ****                 if (r_shift_mod) {                   
+ 282               		.loc 1 229 0
+ 283 0148 9111      		cpse r25,__zero_reg__
+ 284 014a 00C0      		rjmp .L1
+ 285               	.LBB25:
+ 231:keymap_btssk.c ****                     del_key(KC_PAUS);
+ 286               		.loc 1 231 0
+ 287 014c 88E4      		ldi r24,lo8(72)
+ 288 014e 90E0      		ldi r25,0
+ 289               	.L38:
+ 290 0150 0E94 0000 		call del_key
+ 291               	.LVL25:
+ 292               	.L37:
+ 293               	/* epilogue start */
+ 294               	.LBE25:
+ 295               	.LBE28:
+ 296               		.loc 1 237 0
+ 297 0154 CF91      		pop r28
+ 298               	.LVL26:
+ 299 0156 FF90      		pop r15
+ 300 0158 EF90      		pop r14
+ 301               	.LVL27:
+ 302               	.LBB29:
+ 303               	.LBB26:
+ 232:keymap_btssk.c ****                     send_keyboard_report();
+ 304               		.loc 1 232 0
+ 305 015a 0C94 0000 		jmp send_keyboard_report
+ 306               	.LVL28:
+ 307               	.L1:
+ 308               	/* epilogue start */
+ 309               	.LBE26:
+ 310               	.LBE29:
+ 311               		.loc 1 237 0
+ 312 015e CF91      		pop r28
+ 313               	.LVL29:
+ 314 0160 FF90      		pop r15
+ 315 0162 EF90      		pop r14
+ 316               	.LVL30:
+ 317 0164 0895      		ret
+ 318               		.cfi_endproc
+ 319               	.LFE10:
+ 321               	.global	fn_actions
+ 322               		.section	.progmem.data.fn_actions,"a",@progbits
+ 325               	fn_actions:
+ 326 0000 00F0      		.word	-4096
+ 327 0002 01F0      		.word	-4095
+ 328 0004 02F0      		.word	-4094
+ 329 0006 39A3      		.word	-23751
+ 330 0008 F1A4      		.word	-23311
+ 331 000a 03F0      		.word	-4093
+ 332               	.global	keymaps
+ 333               		.section	.progmem.data.keymaps,"a",@progbits
+ 336               	keymaps:
+ 337 0000 00        		.byte	0
+ 338 0001 00        		.byte	0
+ 339 0002 00        		.byte	0
+ 340 0003 00        		.byte	0
+ 341 0004 00        		.byte	0
+ 342 0005 05        		.byte	5
+ 343 0006 2C        		.byte	44
+ 344 0007 11        		.byte	17
+ 345 0008 E5        		.byte	-27
+ 346 0009 00        		.byte	0
+ 347 000a 38        		.byte	56
+ 348 000b 51        		.byte	81
+ 349 000c 4F        		.byte	79
+ 350 000d 00        		.byte	0
+ 351 000e 50        		.byte	80
+ 352 000f E6        		.byte	-26
+ 353 0010 E4        		.byte	-28
+ 354 0011 E5        		.byte	-27
+ 355 0012 1D        		.byte	29
+ 356 0013 1B        		.byte	27
+ 357 0014 06        		.byte	6
+ 358 0015 19        		.byte	25
+ 359 0016 28        		.byte	40
+ 360 0017 10        		.byte	16
+ 361 0018 36        		.byte	54
+ 362 0019 37        		.byte	55
+ 363 001a 31        		.byte	49
+ 364 001b 00        		.byte	0
+ 365 001c 00        		.byte	0
+ 366 001d 00        		.byte	0
+ 367 001e 48        		.byte	72
+ 368 001f 00        		.byte	0
+ 369 0020 00        		.byte	0
+ 370 0021 00        		.byte	0
+ 371 0022 04        		.byte	4
+ 372 0023 16        		.byte	22
+ 373 0024 07        		.byte	7
+ 374 0025 09        		.byte	9
+ 375 0026 31        		.byte	49
+ 376 0027 0D        		.byte	13
+ 377 0028 0E        		.byte	14
+ 378 0029 0F        		.byte	15
+ 379 002a 33        		.byte	51
+ 380 002b 00        		.byte	0
+ 381 002c 00        		.byte	0
+ 382 002d 00        		.byte	0
+ 383 002e 00        		.byte	0
+ 384 002f 00        		.byte	0
+ 385 0030 00        		.byte	0
+ 386 0031 00        		.byte	0
+ 387 0032 14        		.byte	20
+ 388 0033 1A        		.byte	26
+ 389 0034 08        		.byte	8
+ 390 0035 15        		.byte	21
+ 391 0036 31        		.byte	49
+ 392 0037 18        		.byte	24
+ 393 0038 0C        		.byte	12
+ 394 0039 12        		.byte	18
+ 395 003a 13        		.byte	19
+ 396 003b 00        		.byte	0
+ 397 003c 00        		.byte	0
+ 398 003d 00        		.byte	0
+ 399 003e 00        		.byte	0
+ 400 003f C0        		.byte	-64
+ 401 0040 00        		.byte	0
+ 402 0041 00        		.byte	0
+ 403 0042 1E        		.byte	30
+ 404 0043 1F        		.byte	31
+ 405 0044 20        		.byte	32
+ 406 0045 21        		.byte	33
+ 407 0046 43        		.byte	67
+ 408 0047 24        		.byte	36
+ 409 0048 25        		.byte	37
+ 410 0049 26        		.byte	38
+ 411 004a 27        		.byte	39
+ 412 004b 44        		.byte	68
+ 413 004c 45        		.byte	69
+ 414 004d 4E        		.byte	78
+ 415 004e 4D        		.byte	77
+ 416 004f 46        		.byte	70
+ 417 0050 E0        		.byte	-32
+ 418 0051 00        		.byte	0
+ 419 0052 35        		.byte	53
+ 420 0053 3A        		.byte	58
+ 421 0054 3B        		.byte	59
+ 422 0055 22        		.byte	34
+ 423 0056 42        		.byte	66
+ 424 0057 23        		.byte	35
+ 425 0058 2E        		.byte	46
+ 426 0059 41        		.byte	65
+ 427 005a 2D        		.byte	45
+ 428 005b 4C        		.byte	76
+ 429 005c 49        		.byte	73
+ 430 005d C2        		.byte	-62
+ 431 005e 4A        		.byte	74
+ 432 005f 00        		.byte	0
+ 433 0060 00        		.byte	0
+ 434 0061 E1        		.byte	-31
+ 435 0062 2B        		.byte	43
+ 436 0063 C3        		.byte	-61
+ 437 0064 3C        		.byte	60
+ 438 0065 17        		.byte	23
+ 439 0066 2A        		.byte	42
+ 440 0067 1C        		.byte	28
+ 441 0068 30        		.byte	48
+ 442 0069 40        		.byte	64
+ 443 006a 2F        		.byte	47
+ 444 006b 00        		.byte	0
+ 445 006c 00        		.byte	0
+ 446 006d 00        		.byte	0
+ 447 006e 00        		.byte	0
+ 448 006f 00        		.byte	0
+ 449 0070 00        		.byte	0
+ 450 0071 00        		.byte	0
+ 451 0072 29        		.byte	41
+ 452 0073 64        		.byte	100
+ 453 0074 3D        		.byte	61
+ 454 0075 0A        		.byte	10
+ 455 0076 3E        		.byte	62
+ 456 0077 0B        		.byte	11
+ 457 0078 3F        		.byte	63
+ 458 0079 00        		.byte	0
+ 459 007a 34        		.byte	52
+ 460 007b 00        		.byte	0
+ 461 007c 00        		.byte	0
+ 462 007d 00        		.byte	0
+ 463 007e 52        		.byte	82
+ 464 007f E2        		.byte	-30
+ 465 0080 00        		.byte	0
+ 466 0081 00        		.byte	0
+ 467 0082 00        		.byte	0
+ 468 0083 00        		.byte	0
+ 469 0084 00        		.byte	0
+ 470 0085 01        		.byte	1
+ 471 0086 01        		.byte	1
+ 472 0087 01        		.byte	1
+ 473 0088 01        		.byte	1
+ 474 0089 00        		.byte	0
+ 475 008a 54        		.byte	84
+ 476 008b 01        		.byte	1
+ 477 008c 01        		.byte	1
+ 478 008d 00        		.byte	0
+ 479 008e 01        		.byte	1
+ 480 008f 01        		.byte	1
+ 481 0090 01        		.byte	1
+ 482 0091 01        		.byte	1
+ 483 0092 01        		.byte	1
+ 484 0093 01        		.byte	1
+ 485 0094 01        		.byte	1
+ 486 0095 01        		.byte	1
+ 487 0096 58        		.byte	88
+ 488 0097 62        		.byte	98
+ 489 0098 85        		.byte	-123
+ 490 0099 63        		.byte	99
+ 491 009a 01        		.byte	1
+ 492 009b 00        		.byte	0
+ 493 009c 00        		.byte	0
+ 494 009d 00        		.byte	0
+ 495 009e 01        		.byte	1
+ 496 009f 00        		.byte	0
+ 497 00a0 00        		.byte	0
+ 498 00a1 00        		.byte	0
+ 499 00a2 01        		.byte	1
+ 500 00a3 01        		.byte	1
+ 501 00a4 01        		.byte	1
+ 502 00a5 01        		.byte	1
+ 503 00a6 01        		.byte	1
+ 504 00a7 59        		.byte	89
+ 505 00a8 5A        		.byte	90
+ 506 00a9 5B        		.byte	91
+ 507 00aa 55        		.byte	85
+ 508 00ab 00        		.byte	0
+ 509 00ac 00        		.byte	0
+ 510 00ad 00        		.byte	0
+ 511 00ae 00        		.byte	0
+ 512 00af 00        		.byte	0
+ 513 00b0 00        		.byte	0
+ 514 00b1 00        		.byte	0
+ 515 00b2 01        		.byte	1
+ 516 00b3 01        		.byte	1
+ 517 00b4 01        		.byte	1
+ 518 00b5 01        		.byte	1
+ 519 00b6 01        		.byte	1
+ 520 00b7 5C        		.byte	92
+ 521 00b8 5D        		.byte	93
+ 522 00b9 5E        		.byte	94
+ 523 00ba 01        		.byte	1
+ 524 00bb 00        		.byte	0
+ 525 00bc 00        		.byte	0
+ 526 00bd 00        		.byte	0
+ 527 00be 00        		.byte	0
+ 528 00bf C1        		.byte	-63
+ 529 00c0 00        		.byte	0
+ 530 00c1 00        		.byte	0
+ 531 00c2 01        		.byte	1
+ 532 00c3 01        		.byte	1
+ 533 00c4 01        		.byte	1
+ 534 00c5 01        		.byte	1
+ 535 00c6 01        		.byte	1
+ 536 00c7 5F        		.byte	95
+ 537 00c8 60        		.byte	96
+ 538 00c9 61        		.byte	97
+ 539 00ca 01        		.byte	1
+ 540 00cb 01        		.byte	1
+ 541 00cc 01        		.byte	1
+ 542 00cd 01        		.byte	1
+ 543 00ce 01        		.byte	1
+ 544 00cf 01        		.byte	1
+ 545 00d0 01        		.byte	1
+ 546 00d1 00        		.byte	0
+ 547 00d2 01        		.byte	1
+ 548 00d3 01        		.byte	1
+ 549 00d4 01        		.byte	1
+ 550 00d5 01        		.byte	1
+ 551 00d6 01        		.byte	1
+ 552 00d7 01        		.byte	1
+ 553 00d8 57        		.byte	87
+ 554 00d9 01        		.byte	1
+ 555 00da 56        		.byte	86
+ 556 00db 01        		.byte	1
+ 557 00dc 01        		.byte	1
+ 558 00dd 01        		.byte	1
+ 559 00de 01        		.byte	1
+ 560 00df 00        		.byte	0
+ 561 00e0 00        		.byte	0
+ 562 00e1 01        		.byte	1
+ 563 00e2 01        		.byte	1
+ 564 00e3 01        		.byte	1
+ 565 00e4 01        		.byte	1
+ 566 00e5 01        		.byte	1
+ 567 00e6 01        		.byte	1
+ 568 00e7 01        		.byte	1
+ 569 00e8 01        		.byte	1
+ 570 00e9 01        		.byte	1
+ 571 00ea 01        		.byte	1
+ 572 00eb 00        		.byte	0
+ 573 00ec 00        		.byte	0
+ 574 00ed 00        		.byte	0
+ 575 00ee 00        		.byte	0
+ 576 00ef 00        		.byte	0
+ 577 00f0 00        		.byte	0
+ 578 00f1 00        		.byte	0
+ 579 00f2 01        		.byte	1
+ 580 00f3 01        		.byte	1
+ 581 00f4 01        		.byte	1
+ 582 00f5 01        		.byte	1
+ 583 00f6 01        		.byte	1
+ 584 00f7 01        		.byte	1
+ 585 00f8 01        		.byte	1
+ 586 00f9 00        		.byte	0
+ 587 00fa 01        		.byte	1
+ 588 00fb 00        		.byte	0
+ 589 00fc 00        		.byte	0
+ 590 00fd 00        		.byte	0
+ 591 00fe 01        		.byte	1
+ 592 00ff 01        		.byte	1
+ 593 0100 00        		.byte	0
+ 594 0101 00        		.byte	0
+ 595 0102 00        		.byte	0
+ 596 0103 00        		.byte	0
+ 597 0104 00        		.byte	0
+ 598 0105 01        		.byte	1
+ 599 0106 01        		.byte	1
+ 600 0107 01        		.byte	1
+ 601 0108 01        		.byte	1
+ 602 0109 00        		.byte	0
+ 603 010a 01        		.byte	1
+ 604 010b 01        		.byte	1
+ 605 010c 01        		.byte	1
+ 606 010d 00        		.byte	0
+ 607 010e 01        		.byte	1
+ 608 010f 01        		.byte	1
+ 609 0110 C4        		.byte	-60
+ 610 0111 01        		.byte	1
+ 611 0112 01        		.byte	1
+ 612 0113 01        		.byte	1
+ 613 0114 01        		.byte	1
+ 614 0115 01        		.byte	1
+ 615 0116 01        		.byte	1
+ 616 0117 01        		.byte	1
+ 617 0118 01        		.byte	1
+ 618 0119 01        		.byte	1
+ 619 011a 01        		.byte	1
+ 620 011b 00        		.byte	0
+ 621 011c 00        		.byte	0
+ 622 011d 00        		.byte	0
+ 623 011e 01        		.byte	1
+ 624 011f 00        		.byte	0
+ 625 0120 00        		.byte	0
+ 626 0121 00        		.byte	0
+ 627 0122 01        		.byte	1
+ 628 0123 01        		.byte	1
+ 629 0124 01        		.byte	1
+ 630 0125 01        		.byte	1
+ 631 0126 01        		.byte	1
+ 632 0127 01        		.byte	1
+ 633 0128 01        		.byte	1
+ 634 0129 01        		.byte	1
+ 635 012a 01        		.byte	1
+ 636 012b 00        		.byte	0
+ 637 012c 00        		.byte	0
+ 638 012d 00        		.byte	0
+ 639 012e 00        		.byte	0
+ 640 012f 00        		.byte	0
+ 641 0130 00        		.byte	0
+ 642 0131 00        		.byte	0
+ 643 0132 01        		.byte	1
+ 644 0133 01        		.byte	1
+ 645 0134 01        		.byte	1
+ 646 0135 01        		.byte	1
+ 647 0136 01        		.byte	1
+ 648 0137 01        		.byte	1
+ 649 0138 01        		.byte	1
+ 650 0139 01        		.byte	1
+ 651 013a 01        		.byte	1
+ 652 013b 00        		.byte	0
+ 653 013c 00        		.byte	0
+ 654 013d 00        		.byte	0
+ 655 013e 00        		.byte	0
+ 656 013f 01        		.byte	1
+ 657 0140 00        		.byte	0
+ 658 0141 00        		.byte	0
+ 659 0142 01        		.byte	1
+ 660 0143 01        		.byte	1
+ 661 0144 01        		.byte	1
+ 662 0145 01        		.byte	1
+ 663 0146 01        		.byte	1
+ 664 0147 01        		.byte	1
+ 665 0148 01        		.byte	1
+ 666 0149 01        		.byte	1
+ 667 014a 01        		.byte	1
+ 668 014b 01        		.byte	1
+ 669 014c 01        		.byte	1
+ 670 014d F3        		.byte	-13
+ 671 014e F1        		.byte	-15
+ 672 014f 01        		.byte	1
+ 673 0150 01        		.byte	1
+ 674 0151 00        		.byte	0
+ 675 0152 01        		.byte	1
+ 676 0153 01        		.byte	1
+ 677 0154 01        		.byte	1
+ 678 0155 01        		.byte	1
+ 679 0156 01        		.byte	1
+ 680 0157 01        		.byte	1
+ 681 0158 01        		.byte	1
+ 682 0159 01        		.byte	1
+ 683 015a 01        		.byte	1
+ 684 015b F2        		.byte	-14
+ 685 015c F4        		.byte	-12
+ 686 015d F5        		.byte	-11
+ 687 015e F0        		.byte	-16
+ 688 015f 00        		.byte	0
+ 689 0160 00        		.byte	0
+ 690 0161 01        		.byte	1
+ 691 0162 01        		.byte	1
+ 692 0163 01        		.byte	1
+ 693 0164 01        		.byte	1
+ 694 0165 01        		.byte	1
+ 695 0166 01        		.byte	1
+ 696 0167 01        		.byte	1
+ 697 0168 01        		.byte	1
+ 698 0169 01        		.byte	1
+ 699 016a 01        		.byte	1
+ 700 016b 00        		.byte	0
+ 701 016c 00        		.byte	0
+ 702 016d 00        		.byte	0
+ 703 016e 00        		.byte	0
+ 704 016f 00        		.byte	0
+ 705 0170 00        		.byte	0
+ 706 0171 00        		.byte	0
+ 707 0172 01        		.byte	1
+ 708 0173 01        		.byte	1
+ 709 0174 01        		.byte	1
+ 710 0175 01        		.byte	1
+ 711 0176 01        		.byte	1
+ 712 0177 01        		.byte	1
+ 713 0178 01        		.byte	1
+ 714 0179 00        		.byte	0
+ 715 017a 01        		.byte	1
+ 716 017b 00        		.byte	0
+ 717 017c 00        		.byte	0
+ 718 017d 00        		.byte	0
+ 719 017e 01        		.byte	1
+ 720 017f 01        		.byte	1
+ 721 0180 00        		.byte	0
+ 722 0181 00        		.byte	0
+ 723 0182 00        		.byte	0
+ 724 0183 00        		.byte	0
+ 725 0184 00        		.byte	0
+ 726 0185 01        		.byte	1
+ 727 0186 01        		.byte	1
+ 728 0187 01        		.byte	1
+ 729 0188 01        		.byte	1
+ 730 0189 00        		.byte	0
+ 731 018a 01        		.byte	1
+ 732 018b A8        		.byte	-88
+ 733 018c A9        		.byte	-87
+ 734 018d 00        		.byte	0
+ 735 018e AA        		.byte	-86
+ 736 018f E7        		.byte	-25
+ 737 0190 01        		.byte	1
+ 738 0191 01        		.byte	1
+ 739 0192 01        		.byte	1
+ 740 0193 01        		.byte	1
+ 741 0194 01        		.byte	1
+ 742 0195 01        		.byte	1
+ 743 0196 01        		.byte	1
+ 744 0197 01        		.byte	1
+ 745 0198 01        		.byte	1
+ 746 0199 01        		.byte	1
+ 747 019a 01        		.byte	1
+ 748 019b 00        		.byte	0
+ 749 019c 00        		.byte	0
+ 750 019d 00        		.byte	0
+ 751 019e C5        		.byte	-59
+ 752 019f 00        		.byte	0
+ 753 01a0 00        		.byte	0
+ 754 01a1 00        		.byte	0
+ 755 01a2 01        		.byte	1
+ 756 01a3 01        		.byte	1
+ 757 01a4 01        		.byte	1
+ 758 01a5 01        		.byte	1
+ 759 01a6 01        		.byte	1
+ 760 01a7 01        		.byte	1
+ 761 01a8 01        		.byte	1
+ 762 01a9 01        		.byte	1
+ 763 01aa 01        		.byte	1
+ 764 01ab 00        		.byte	0
+ 765 01ac 00        		.byte	0
+ 766 01ad 00        		.byte	0
+ 767 01ae 00        		.byte	0
+ 768 01af 00        		.byte	0
+ 769 01b0 00        		.byte	0
+ 770 01b1 00        		.byte	0
+ 771 01b2 01        		.byte	1
+ 772 01b3 01        		.byte	1
+ 773 01b4 01        		.byte	1
+ 774 01b5 01        		.byte	1
+ 775 01b6 01        		.byte	1
+ 776 01b7 01        		.byte	1
+ 777 01b8 01        		.byte	1
+ 778 01b9 01        		.byte	1
+ 779 01ba 01        		.byte	1
+ 780 01bb 00        		.byte	0
+ 781 01bc 00        		.byte	0
+ 782 01bd 00        		.byte	0
+ 783 01be 00        		.byte	0
+ 784 01bf 01        		.byte	1
+ 785 01c0 00        		.byte	0
+ 786 01c1 00        		.byte	0
+ 787 01c2 01        		.byte	1
+ 788 01c3 01        		.byte	1
+ 789 01c4 01        		.byte	1
+ 790 01c5 01        		.byte	1
+ 791 01c6 AE        		.byte	-82
+ 792 01c7 01        		.byte	1
+ 793 01c8 01        		.byte	1
+ 794 01c9 01        		.byte	1
+ 795 01ca 01        		.byte	1
+ 796 01cb AC        		.byte	-84
+ 797 01cc AB        		.byte	-85
+ 798 01cd 01        		.byte	1
+ 799 01ce 01        		.byte	1
+ 800 01cf 01        		.byte	1
+ 801 01d0 01        		.byte	1
+ 802 01d1 00        		.byte	0
+ 803 01d2 01        		.byte	1
+ 804 01d3 01        		.byte	1
+ 805 01d4 01        		.byte	1
+ 806 01d5 01        		.byte	1
+ 807 01d6 01        		.byte	1
+ 808 01d7 01        		.byte	1
+ 809 01d8 01        		.byte	1
+ 810 01d9 01        		.byte	1
+ 811 01da 01        		.byte	1
+ 812 01db 01        		.byte	1
+ 813 01dc 01        		.byte	1
+ 814 01dd 01        		.byte	1
+ 815 01de 01        		.byte	1
+ 816 01df 00        		.byte	0
+ 817 01e0 00        		.byte	0
+ 818 01e1 01        		.byte	1
+ 819 01e2 01        		.byte	1
+ 820 01e3 01        		.byte	1
+ 821 01e4 01        		.byte	1
+ 822 01e5 01        		.byte	1
+ 823 01e6 01        		.byte	1
+ 824 01e7 01        		.byte	1
+ 825 01e8 01        		.byte	1
+ 826 01e9 01        		.byte	1
+ 827 01ea 01        		.byte	1
+ 828 01eb 00        		.byte	0
+ 829 01ec 00        		.byte	0
+ 830 01ed 00        		.byte	0
+ 831 01ee 00        		.byte	0
+ 832 01ef 00        		.byte	0
+ 833 01f0 00        		.byte	0
+ 834 01f1 00        		.byte	0
+ 835 01f2 01        		.byte	1
+ 836 01f3 01        		.byte	1
+ 837 01f4 01        		.byte	1
+ 838 01f5 01        		.byte	1
+ 839 01f6 01        		.byte	1
+ 840 01f7 01        		.byte	1
+ 841 01f8 01        		.byte	1
+ 842 01f9 00        		.byte	0
+ 843 01fa 01        		.byte	1
+ 844 01fb 00        		.byte	0
+ 845 01fc 00        		.byte	0
+ 846 01fd 00        		.byte	0
+ 847 01fe 01        		.byte	1
+ 848 01ff E3        		.byte	-29
+ 849 0200 00        		.byte	0
+ 850 0201 00        		.byte	0
+ 851 0202 00        		.byte	0
+ 852 0203 00        		.byte	0
+ 853 0204 00        		.byte	0
+ 854 0205 01        		.byte	1
+ 855 0206 01        		.byte	1
+ 856 0207 01        		.byte	1
+ 857 0208 01        		.byte	1
+ 858 0209 00        		.byte	0
+ 859 020a 01        		.byte	1
+ 860 020b 01        		.byte	1
+ 861 020c 01        		.byte	1
+ 862 020d 00        		.byte	0
+ 863 020e 01        		.byte	1
+ 864 020f 01        		.byte	1
+ 865 0210 01        		.byte	1
+ 866 0211 01        		.byte	1
+ 867 0212 01        		.byte	1
+ 868 0213 01        		.byte	1
+ 869 0214 01        		.byte	1
+ 870 0215 01        		.byte	1
+ 871 0216 01        		.byte	1
+ 872 0217 01        		.byte	1
+ 873 0218 01        		.byte	1
+ 874 0219 01        		.byte	1
+ 875 021a 01        		.byte	1
+ 876 021b 00        		.byte	0
+ 877 021c 00        		.byte	0
+ 878 021d 00        		.byte	0
+ 879 021e 01        		.byte	1
+ 880 021f 00        		.byte	0
+ 881 0220 00        		.byte	0
+ 882 0221 00        		.byte	0
+ 883 0222 01        		.byte	1
+ 884 0223 01        		.byte	1
+ 885 0224 01        		.byte	1
+ 886 0225 01        		.byte	1
+ 887 0226 01        		.byte	1
+ 888 0227 01        		.byte	1
+ 889 0228 01        		.byte	1
+ 890 0229 01        		.byte	1
+ 891 022a 01        		.byte	1
+ 892 022b 00        		.byte	0
+ 893 022c 00        		.byte	0
+ 894 022d 00        		.byte	0
+ 895 022e 00        		.byte	0
+ 896 022f 00        		.byte	0
+ 897 0230 00        		.byte	0
+ 898 0231 00        		.byte	0
+ 899 0232 01        		.byte	1
+ 900 0233 01        		.byte	1
+ 901 0234 01        		.byte	1
+ 902 0235 01        		.byte	1
+ 903 0236 01        		.byte	1
+ 904 0237 01        		.byte	1
+ 905 0238 01        		.byte	1
+ 906 0239 01        		.byte	1
+ 907 023a 01        		.byte	1
+ 908 023b 00        		.byte	0
+ 909 023c 00        		.byte	0
+ 910 023d 00        		.byte	0
+ 911 023e 00        		.byte	0
+ 912 023f 01        		.byte	1
+ 913 0240 00        		.byte	0
+ 914 0241 00        		.byte	0
+ 915 0242 01        		.byte	1
+ 916 0243 01        		.byte	1
+ 917 0244 01        		.byte	1
+ 918 0245 01        		.byte	1
+ 919 0246 01        		.byte	1
+ 920 0247 01        		.byte	1
+ 921 0248 01        		.byte	1
+ 922 0249 01        		.byte	1
+ 923 024a 01        		.byte	1
+ 924 024b 01        		.byte	1
+ 925 024c 01        		.byte	1
+ 926 024d 01        		.byte	1
+ 927 024e FA        		.byte	-6
+ 928 024f 01        		.byte	1
+ 929 0250 01        		.byte	1
+ 930 0251 00        		.byte	0
+ 931 0252 01        		.byte	1
+ 932 0253 01        		.byte	1
+ 933 0254 01        		.byte	1
+ 934 0255 01        		.byte	1
+ 935 0256 01        		.byte	1
+ 936 0257 01        		.byte	1
+ 937 0258 01        		.byte	1
+ 938 0259 01        		.byte	1
+ 939 025a 01        		.byte	1
+ 940 025b 01        		.byte	1
+ 941 025c 01        		.byte	1
+ 942 025d 01        		.byte	1
+ 943 025e F9        		.byte	-7
+ 944 025f 00        		.byte	0
+ 945 0260 00        		.byte	0
+ 946 0261 01        		.byte	1
+ 947 0262 01        		.byte	1
+ 948 0263 01        		.byte	1
+ 949 0264 01        		.byte	1
+ 950 0265 01        		.byte	1
+ 951 0266 01        		.byte	1
+ 952 0267 01        		.byte	1
+ 953 0268 01        		.byte	1
+ 954 0269 01        		.byte	1
+ 955 026a 01        		.byte	1
+ 956 026b 00        		.byte	0
+ 957 026c 00        		.byte	0
+ 958 026d 00        		.byte	0
+ 959 026e 00        		.byte	0
+ 960 026f 00        		.byte	0
+ 961 0270 00        		.byte	0
+ 962 0271 00        		.byte	0
+ 963 0272 01        		.byte	1
+ 964 0273 01        		.byte	1
+ 965 0274 01        		.byte	1
+ 966 0275 01        		.byte	1
+ 967 0276 01        		.byte	1
+ 968 0277 01        		.byte	1
+ 969 0278 01        		.byte	1
+ 970 0279 00        		.byte	0
+ 971 027a 01        		.byte	1
+ 972 027b 00        		.byte	0
+ 973 027c 00        		.byte	0
+ 974 027d 00        		.byte	0
+ 975 027e 01        		.byte	1
+ 976 027f 01        		.byte	1
+ 977               		.section	.progmem.data.__c.2281,"a",@progbits
+ 980               	__c.2281:
+ 981 0000 5000      		.string	"P"
+ 982               		.section	.progmem.data.__c.2283,"a",@progbits
+ 985               	__c.2283:
+ 986 0000 5200      		.string	"R"
+ 987               		.section	.progmem.data.__c.2285,"a",@progbits
+ 990               	__c.2285:
+ 991 0000 6900      		.string	"i"
+ 992               		.section	.bss.shift_mod.2287,"aw",@nobits
+ 995               	shift_mod.2287:
+ 996 0000 00        		.zero	1
+ 997               		.section	.bss.rctrl_mod.2288,"aw",@nobits
+ 1000               	rctrl_mod.2288:
+ 1001 0000 00        		.zero	1
+ 1002               		.section	.bss.r_shift_mod.2289,"aw",@nobits
+ 1005               	r_shift_mod.2289:
+ 1006 0000 00        		.zero	1
+ 1007               		.text
+ 1008               	.Letext0:
+ 1009               		.file 3 "/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/stdint.h"
+ 1010               		.file 4 "../../../../tmk_core/common/keycode.h"
+ 1011               		.file 5 "../../../../tmk_core/common/keyboard.h"
+ 1012               		.file 6 "../../../../tmk_core/common/action_code.h"
+ 1013               		.file 7 "../../../../tmk_core/common/action.h"
+ 1014               		.file 8 "../../../../tmk_core/common/debug.h"
+ 1015               		.file 9 "../../../../tmk_core/common/action_layer.h"
+ 1016               		.file 10 "../../../../tmk_core/common/avr/xprintf.h"
+ 1017               		.file 11 "../../../../tmk_core/common/bootloader.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 keymap_btssk.c
+     /tmp/cc1gIj8Y.s:2      *ABS*:000000000000003e __SP_H__
+     /tmp/cc1gIj8Y.s:3      *ABS*:000000000000003d __SP_L__
+     /tmp/cc1gIj8Y.s:4      *ABS*:000000000000003f __SREG__
+     /tmp/cc1gIj8Y.s:5      *ABS*:000000000000003b __RAMPZ__
+     /tmp/cc1gIj8Y.s:6      *ABS*:0000000000000000 __tmp_reg__
+     /tmp/cc1gIj8Y.s:7      *ABS*:0000000000000001 __zero_reg__
+     /tmp/cc1gIj8Y.s:14     .text.action_function:0000000000000000 action_function
+     /tmp/cc1gIj8Y.s:980    .progmem.data.__c.2281:0000000000000000 __c.2281
+     /tmp/cc1gIj8Y.s:985    .progmem.data.__c.2283:0000000000000000 __c.2283
+     /tmp/cc1gIj8Y.s:990    .progmem.data.__c.2285:0000000000000000 __c.2285
+     /tmp/cc1gIj8Y.s:995    .bss.shift_mod.2287:0000000000000000 shift_mod.2287
+     /tmp/cc1gIj8Y.s:1000   .bss.rctrl_mod.2288:0000000000000000 rctrl_mod.2288
+     /tmp/cc1gIj8Y.s:1005   .bss.r_shift_mod.2289:0000000000000000 r_shift_mod.2289
+     /tmp/cc1gIj8Y.s:325    .progmem.data.fn_actions:0000000000000000 fn_actions
+     /tmp/cc1gIj8Y.s:336    .progmem.data.keymaps:0000000000000000 keymaps
+
+UNDEFINED SYMBOLS
+debug_config
+xputs
+get_mods
+del_mods
+layer_invert
+add_key
+send_keyboard_report
+add_mods
+bootloader_jump
+del_key
+__do_clear_bss
