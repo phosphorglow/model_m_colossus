@@ -18,9 +18,12 @@
 #include "hook.h"
 #include "suspend.h"
 #include <avr/power.h>
+#include "led.h"
+#include "sleep_led.h"
 
 static bool config_mode = false;
 static bool force_usb = false;
+bool stay_connected = 0;
 
 static void status_led(bool on)
 {
@@ -36,6 +39,7 @@ static void status_led(bool on)
 void rn42_task_init(void)
 {
     battery_init();
+    sleep_led_init();
 }
 
 void rn42_task(void)
@@ -243,19 +247,28 @@ static void store_link(uint8_t *eeaddr)
 static void restore_link(const uint8_t *eeaddr)
 {
     enter_command_mode();
-    SEND_COMMAND("Q\r\n");   // quiet
-    SEND_COMMAND("SX,1\r\n");   // bond    
-    SEND_COMMAND("SR,Z\r\n");   // remove remote address
+    SEND_COMMAND("Q,2\r\n");   // quiet
+    //SEND_COMMAND("SX,1\r\n");   // bond    
+    //SEND_COMMAND("SR,Z\r\n");   // remove remote address
     SEND_STR("SR,");            // set remote address from EEPROM
     for (int i = 0; i < 12; i++) {
         uint8_t c = eeprom_read_byte(eeaddr+i);
         rn42_putc(c);
         dprintf("%c ", c);
     }
+    SEND_COMMAND("\r\n");    
+
+    SEND_STR("C,");            // set remote address from EEPROM
+    for (int i = 0; i < 12; i++) {
+        uint8_t c = eeprom_read_byte(eeaddr+i);
+        rn42_putc(c);
+        dprintf("%c ", c);
+    }    
     dprintf("\r\n");
     SEND_COMMAND("\r\n");
-    //SEND_COMMAND("R,1\r\n");    // reboot
-    exit_command_mode();
+        wait_ms(5000);
+    SEND_COMMAND("R,1\r\n");    // reboot
+    exit_command_mode_2();
 }
 
 static const char *get_link(uint8_t * eeaddr)
@@ -342,7 +355,23 @@ bool command_extra(uint8_t code)
             return true;
 	    
         case KC_5:
-            suspend_power_down();  
+	  xprintf("blah! \n");
+            //rn42_cts_hi(); 
+	    if (stay_connected == 1){
+	      dprintf("Disconnect after 5 min.\n");		
+	      stay_connected = !stay_connected;
+	    }else{
+	      dprintf("Stay connected.\n");
+	      stay_connected = 1;
+	      //last_press_timer = timer_read32();
+	    }
+	    return true;
+
+        case KC_6:
+            clear_keyboard();
+            host_set_driver(&rn42_config_driver);   // null driver; not to send a key to host
+            rn42_disconnect();
+            return true;	    
 
         case KC_I:
             print("\n----- RN-42 info -----\n");
@@ -400,7 +429,6 @@ bool command_extra(uint8_t code)
                 print("USB mode\n");                
                 clear_keyboard();
                 host_set_driver(&rn42_driver);
-		PORTD &= ~(1<<PD4);
             }
             return true;
         case KC_DELETE:
@@ -503,28 +531,42 @@ static uint8_t code2asc(uint8_t code)
     }
 }
 
-bool second_test = 0;
 bool test_status = 0;
+bool second_test = 0;
 bool third_test = 1;
 uint32_t last_press_timer;
 
 void hook_matrix_change(keyevent_t event)
 {
-    // only flash LED for key press events, not key release events.
+    // 
+  if (stay_connected){
+    test_status = 0;
+    last_press_timer = 0;
+
+  }else{
+
     if (event.pressed)
     {
-        dprintf("test...\n");
-    if (!(PINB & (1<<4))) {
+
+    if (!(PINB & (1<<4))) { // Battery powered.
         test_status = 1;
         last_press_timer = timer_read32();
-	  if (second_test){
-	    dprintf("second test..\n");
-	    rn42_cts_lo();
-	    rn42_autoconnect();
-	    second_test = 0;
-	  }
     }
+      else { // Plugged in, no need to disconnect Bluetooth if connected.
+	test_status = 0;
+	last_press_timer = 0;
+      }  
     }
+
+    if (second_test){
+      dprintf("second test..\n");
+      rn42_cts_lo();
+      rn42_autoconnect();
+      second_test = 0;
+	    sleep_led_toggle();
+      led_set(host_keyboard_leds());
+    }
+  }
 }
 
 void hook_keyboard_loop(void)
@@ -532,11 +574,14 @@ void hook_keyboard_loop(void)
 
     if (test_status)
     {
-        // check if we've reached 20 milliseconds yet...
-        if (timer_elapsed32(last_press_timer) > 300000)
+        // 
+        if (timer_elapsed32(last_press_timer) > 480000) // 8 minutes since last keypress
         {
             dprintf("test after\n");
 	    rn42_disconnect();
+	    led_set(host_keyboard_leds() & ~(1<<USB_LED_CAPS_LOCK)); // Turn off Caps Lock LED
+	    sleep_led_toggle();
+	    // if layer state x == 1, turn off layer LED and set bool saying it was on previously	    
 	      if (third_test){
 		quiet_mode();
 		third_test = 0;

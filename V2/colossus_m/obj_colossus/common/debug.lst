@@ -1,0 +1,31 @@
+   1               		.file	"debug.c"
+   2               	__SP_H__ = 0x3e
+   3               	__SP_L__ = 0x3d
+   4               	__SREG__ = 0x3f
+   5               	__RAMPZ__ = 0x3b
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+   8               		.text
+   9               	.Ltext0:
+  10               		.cfi_sections	.debug_frame
+  11               	.global	debug_config
+  12               		.section	.bss.debug_config,"aw",@nobits
+  15               	debug_config:
+  16 0000 00        		.zero	1
+  17               		.text
+  18               	.Letext0:
+  19               		.file 1 "../../../../tmk_core/common/debug.h"
+  20               		.file 2 "/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/stdint.h"
+  21               		.file 3 "../../../../tmk_core/common/debug.c"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 debug.c
+     /tmp/ccEazQYq.s:2      *ABS*:000000000000003e __SP_H__
+     /tmp/ccEazQYq.s:3      *ABS*:000000000000003d __SP_L__
+     /tmp/ccEazQYq.s:4      *ABS*:000000000000003f __SREG__
+     /tmp/ccEazQYq.s:5      *ABS*:000000000000003b __RAMPZ__
+     /tmp/ccEazQYq.s:6      *ABS*:0000000000000000 __tmp_reg__
+     /tmp/ccEazQYq.s:7      *ABS*:0000000000000001 __zero_reg__
+     /tmp/ccEazQYq.s:15     .bss.debug_config:0000000000000000 debug_config
+
+UNDEFINED SYMBOLS
+__do_clear_bss

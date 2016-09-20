@@ -1,0 +1,556 @@
+   1               		.file	"keymap_2.c"
+   2               	__SP_H__ = 0x3e
+   3               	__SP_L__ = 0x3d
+   4               	__SREG__ = 0x3f
+   5               	__RAMPZ__ = 0x3b
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+   8               		.text
+   9               	.Ltext0:
+  10               		.cfi_sections	.debug_frame
+  11               		.section	.text.action_function,"ax",@progbits
+  12               	.global	action_function
+  14               	action_function:
+  15               	.LFB4:
+  16               		.file 1 "keymap_2.c"
+   1:keymap_2.c    **** #include "keymap_common.h"
+   2:keymap_2.c    **** #include "keyboard.h"
+   3:keymap_2.c    **** #include "action_layer.h"
+   4:keymap_2.c    **** #include "bootloader.h"
+   5:keymap_2.c    **** 
+   6:keymap_2.c    **** const uint8_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
+   7:keymap_2.c    ****     /* Keymap 0: Default Layer
+   8:keymap_2.c    ****      * ,-------------------------------------------------------------------------------------------
+   9:keymap_2.c    ****      * |Esc| | F1| F2| F3| F4|  |F5| F6| F7| F8|  |F9| F10| F11| F12|   PSCR|  SCRL|  PAUS|        
+  10:keymap_2.c    ****      * |-------------------------------------------------------------------------------------------
+  11:keymap_2.c    ****      * |-------------------------------------------------------------------------------------------
+  12:keymap_2.c    ****      * |`  |  1|  2|  3|  4|  5|  6|  7|  8|  9|  0|  -|  =| * Bspc|     INS|  HOME|  PGUP|    NLCK
+  13:keymap_2.c    ****      * |-------------------------------------------------------------------------------------------
+  14:keymap_2.c    ****      * |Tab  |  Q|  W|  E|  R|  T|  Y|  U|  I|  O|  P|  [|  ]|    \|     DEL|   END|  PGDN|     P7|
+  15:keymap_2.c    ****      * |-------------------------------------------------------------------------------------------
+  16:keymap_2.c    ****      * |Caps  |  A|  S|  D|  F|  G|  H|  J|  K|  L|  ;|  '|* Return|                            P4|
+  17:keymap_2.c    ****      * |-------------------------------------------------------------------------------------------
+  18:keymap_2.c    ****      * |Shift * |  Z|  X|  C|  V|  B|  N|  M|  ,|  .|  /| *   Shift|            UP |            P1|
+  19:keymap_2.c    ****      * |-------------------------------------------------------------------------------------------
+  20:keymap_2.c    ****      * |Ctrl|    |Alt |            Space          |Alt |    |Ctrl  |    LEFT| DOWN | RIGHT|    | * 
+  21:keymap_2.c    ****      * `-------------------------------------------------------------------------------------------
+  22:keymap_2.c    ****      */
+  23:keymap_2.c    ****     KEYMAP( \
+  24:keymap_2.c    ****         ESC,        F1,  F2,  F3,  F4,  F5,  F6,  F7,  F8,   F9,   F10,   F11,   F12,         PSCR,
+  25:keymap_2.c    ****         GRV,  1,    2,   3,   4,   5,   6,   7,   8,   9,    0,    MINS,  EQL,   BSLS, BSPC,  INS, 
+  26:keymap_2.c    ****         TAB,  Q,    W,   E,   R,   T,   Y,   U,   I,   O,    P,    LBRC,  RBRC,  BSLS,        DEL, 
+  27:keymap_2.c    ****         FN1,  A,    S,   D,   F,   G,   H,   J,   K,   L,    SCLN, QUOT,  BSLS,  ENT,              
+  28:keymap_2.c    ****         LSFT, NUBS, Z,   X,   C,   V,   B,   N,   M,   COMM, DOT,  SLSH,  RSFT,  RSFT,             
+  29:keymap_2.c    ****         LCTL,       LALT,                    SPC,                  RALT,         RCTL,        LEFT,
+  30:keymap_2.c    ****         
+  31:keymap_2.c    ****     KEYMAP( \
+  32:keymap_2.c    ****         TRNS,       TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS, TRNS, TRNS,  TRNS,  TRNS,        TRNS,
+  33:keymap_2.c    ****         TRNS, TRNS, TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS, TRNS, TRNS,  TRNS,  TRNS, TRNS,  TRNS,
+  34:keymap_2.c    ****         TRNS, TRNS, TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS, TRNS, TRNS,  TRNS,  TRNS,        TRNS,
+  35:keymap_2.c    ****         TRNS, TRNS, TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS, TRNS, TRNS,  TRNS,  TRNS,             
+  36:keymap_2.c    ****         TRNS, TRNS, TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS, TRNS, TRNS,  TRNS,  TRNS,             
+  37:keymap_2.c    ****         TRNS,       TRNS,                    TRNS,                 TRNS,         TRNS,        TRNS,
+  38:keymap_2.c    ****          
+  39:keymap_2.c    **** };
+  40:keymap_2.c    **** 
+  41:keymap_2.c    **** /*
+  42:keymap_2.c    **** * user defined action function
+  43:keymap_2.c    **** */
+  44:keymap_2.c    **** enum function_id {
+  45:keymap_2.c    ****     PAUS_BOOT, // Left ALT + Right ALT + Pause = DFU
+  46:keymap_2.c    **** };
+  47:keymap_2.c    **** 
+  48:keymap_2.c    **** void action_function(keyrecord_t *record, uint8_t id, uint8_t opt)
+  49:keymap_2.c    **** {
+  17               		.loc 1 49 0
+  18               		.cfi_startproc
+  19               	.LVL0:
+  20 0000 CF92      		push r12
+  21               	.LCFI0:
+  22               		.cfi_def_cfa_offset 3
+  23               		.cfi_offset 12, -2
+  24 0002 DF92      		push r13
+  25               	.LCFI1:
+  26               		.cfi_def_cfa_offset 4
+  27               		.cfi_offset 13, -3
+  28 0004 EF92      		push r14
+  29               	.LCFI2:
+  30               		.cfi_def_cfa_offset 5
+  31               		.cfi_offset 14, -4
+  32 0006 FF92      		push r15
+  33               	.LCFI3:
+  34               		.cfi_def_cfa_offset 6
+  35               		.cfi_offset 15, -5
+  36               	/* prologue: function */
+  37               	/* frame size = 0 */
+  38               	/* stack size = 4 */
+  39               	.L__stack_usage = 4
+  40 0008 6C01      		movw r12,r24
+  50:keymap_2.c    ****     if (record->event.pressed) dprint("P"); else dprint("R");
+  51:keymap_2.c    ****     if (record->tap.interrupted) dprint("i");
+  52:keymap_2.c    **** 
+  53:keymap_2.c    **** #   define MODS_MASK_1   (MOD_BIT(KC_LALT))
+  54:keymap_2.c    **** #   define MODS_MASK_2   (MOD_BIT(KC_RALT))    
+  55:keymap_2.c    ****     static uint8_t lalt_ralt_mods;
+  56:keymap_2.c    **** 
+  57:keymap_2.c    ****     switch (id) {
+  41               		.loc 1 57 0
+  42 000a 6111      		cpse r22,__zero_reg__
+  43 000c 00C0      		rjmp .L1
+  44               	.LBB2:
+  58:keymap_2.c    ****         // Left ALT + Right ALT + Pause = DFU
+  59:keymap_2.c    ****         case PAUS_BOOT:
+  60:keymap_2.c    ****             lalt_ralt_mods = get_mods()&MODS_MASK_1 && get_mods()&MODS_MASK_2;
+  45               		.loc 1 60 0
+  46 000e 0E94 0000 		call get_mods
+  47               	.LVL1:
+  48 0012 82FF      		sbrs r24,2
+  49 0014 00C0      		rjmp .L7
+  50               		.loc 1 60 0 is_stmt 0 discriminator 1
+  51 0016 0E94 0000 		call get_mods
+  52               	.LVL2:
+  53 001a 86FB      		bst r24,6
+  54 001c EE24      		clr r14
+  55 001e E0F8      		bld r14,0
+  56 0020 F12C      		mov r15,__zero_reg__
+  57 0022 00C0      		rjmp .L4
+  58               	.L7:
+  59               		.loc 1 60 0
+  60 0024 E12C      		mov r14,__zero_reg__
+  61 0026 F12C      		mov r15,__zero_reg__
+  62               	.L4:
+  63               		.loc 1 60 0 discriminator 4
+  64 0028 E092 0000 		sts lalt_ralt_mods.2110,r14
+  61:keymap_2.c    ****             if (record->event.pressed) {
+  65               		.loc 1 61 0 is_stmt 1 discriminator 4
+  66 002c F601      		movw r30,r12
+  67 002e 9281      		ldd r25,Z+2
+  68 0030 9923      		tst r25
+  69 0032 01F0      		breq .L5
+  62:keymap_2.c    ****                 if (lalt_ralt_mods) {
+  70               		.loc 1 62 0
+  71 0034 EE20      		tst r14
+  72 0036 01F0      		breq .L6
+  73               	.LBB3:
+  63:keymap_2.c    **** 		    del_mods(lalt_ralt_mods);
+  74               		.loc 1 63 0
+  75 0038 C701      		movw r24,r14
+  76 003a 0E94 0000 		call del_mods
+  77               	.LVL3:
+  64:keymap_2.c    **** 		    send_keyboard_report();
+  78               		.loc 1 64 0
+  79 003e 0E94 0000 		call send_keyboard_report
+  80               	.LVL4:
+  65:keymap_2.c    **** 		    clear_keyboard();
+  81               		.loc 1 65 0
+  82 0042 0E94 0000 		call clear_keyboard
+  83               	.LVL5:
+  84               	/* epilogue start */
+  85               	.LBE3:
+  86               	.LBE2:
+  66:keymap_2.c    **** 		    bootloader_jump(); 
+  67:keymap_2.c    ****                 } else {
+  68:keymap_2.c    ****                     del_mods(lalt_ralt_mods); // remove shift
+  69:keymap_2.c    ****                     add_key(KC_PAUS);
+  70:keymap_2.c    ****                     send_keyboard_report(); // send Scroll Lock
+  71:keymap_2.c    ****                     add_mods(lalt_ralt_mods);
+  72:keymap_2.c    ****                 }
+  73:keymap_2.c    ****             } else {
+  74:keymap_2.c    ****                 if (lalt_ralt_mods) {                   
+  75:keymap_2.c    ****                 } else {
+  76:keymap_2.c    ****                     del_key(KC_PAUS);
+  77:keymap_2.c    ****                     send_keyboard_report();
+  78:keymap_2.c    ****                 }
+  79:keymap_2.c    ****             }
+  80:keymap_2.c    ****             break;
+  81:keymap_2.c    ****     }
+  82:keymap_2.c    **** 
+  83:keymap_2.c    **** };
+  87               		.loc 1 83 0
+  88 0046 FF90      		pop r15
+  89 0048 EF90      		pop r14
+  90 004a DF90      		pop r13
+  91 004c CF90      		pop r12
+  92               	.LVL6:
+  93               	.LBB9:
+  94               	.LBB4:
+  66:keymap_2.c    **** 		    bootloader_jump(); 
+  95               		.loc 1 66 0
+  96 004e 0C94 0000 		jmp bootloader_jump
+  97               	.LVL7:
+  98               	.L6:
+  99               	.LBE4:
+ 100               	.LBB5:
+  68:keymap_2.c    ****                     del_mods(lalt_ralt_mods); // remove shift
+ 101               		.loc 1 68 0
+ 102 0052 C701      		movw r24,r14
+ 103 0054 0E94 0000 		call del_mods
+ 104               	.LVL8:
+  69:keymap_2.c    ****                     add_key(KC_PAUS);
+ 105               		.loc 1 69 0
+ 106 0058 88E4      		ldi r24,lo8(72)
+ 107 005a 90E0      		ldi r25,0
+ 108 005c 0E94 0000 		call add_key
+ 109               	.LVL9:
+  70:keymap_2.c    ****                     send_keyboard_report(); // send Scroll Lock
+ 110               		.loc 1 70 0
+ 111 0060 0E94 0000 		call send_keyboard_report
+ 112               	.LVL10:
+  71:keymap_2.c    ****                     add_mods(lalt_ralt_mods);
+ 113               		.loc 1 71 0
+ 114 0064 8091 0000 		lds r24,lalt_ralt_mods.2110
+ 115 0068 90E0      		ldi r25,0
+ 116               	/* epilogue start */
+ 117               	.LBE5:
+ 118               	.LBE9:
+ 119               		.loc 1 83 0
+ 120 006a FF90      		pop r15
+ 121 006c EF90      		pop r14
+ 122 006e DF90      		pop r13
+ 123 0070 CF90      		pop r12
+ 124               	.LVL11:
+ 125               	.LBB10:
+ 126               	.LBB6:
+  71:keymap_2.c    ****                     add_mods(lalt_ralt_mods);
+ 127               		.loc 1 71 0
+ 128 0072 0C94 0000 		jmp add_mods
+ 129               	.LVL12:
+ 130               	.L5:
+ 131               	.LBE6:
+  74:keymap_2.c    ****                 if (lalt_ralt_mods) {                   
+ 132               		.loc 1 74 0
+ 133 0076 E110      		cpse r14,__zero_reg__
+ 134 0078 00C0      		rjmp .L1
+ 135               	.LBB7:
+  76:keymap_2.c    ****                     del_key(KC_PAUS);
+ 136               		.loc 1 76 0
+ 137 007a 88E4      		ldi r24,lo8(72)
+ 138 007c 90E0      		ldi r25,0
+ 139 007e 0E94 0000 		call del_key
+ 140               	.LVL13:
+ 141               	/* epilogue start */
+ 142               	.LBE7:
+ 143               	.LBE10:
+ 144               		.loc 1 83 0
+ 145 0082 FF90      		pop r15
+ 146 0084 EF90      		pop r14
+ 147 0086 DF90      		pop r13
+ 148 0088 CF90      		pop r12
+ 149               	.LVL14:
+ 150               	.LBB11:
+ 151               	.LBB8:
+  77:keymap_2.c    ****                     send_keyboard_report();
+ 152               		.loc 1 77 0
+ 153 008a 0C94 0000 		jmp send_keyboard_report
+ 154               	.LVL15:
+ 155               	.L1:
+ 156               	/* epilogue start */
+ 157               	.LBE8:
+ 158               	.LBE11:
+ 159               		.loc 1 83 0
+ 160 008e FF90      		pop r15
+ 161 0090 EF90      		pop r14
+ 162 0092 DF90      		pop r13
+ 163 0094 CF90      		pop r12
+ 164               	.LVL16:
+ 165 0096 0895      		ret
+ 166               		.cfi_endproc
+ 167               	.LFE4:
+ 169               	.global	fn_actions
+ 170               		.section	.progmem.data.fn_actions,"a",@progbits
+ 173               	fn_actions:
+ 174 0000 00F0      		.word	-4096
+ 175 0002 39A1      		.word	-24263
+ 176               	.global	keymaps
+ 177               		.section	.progmem.data.keymaps,"a",@progbits
+ 180               	keymaps:
+ 181 0000 00        		.byte	0
+ 182 0001 00        		.byte	0
+ 183 0002 00        		.byte	0
+ 184 0003 00        		.byte	0
+ 185 0004 00        		.byte	0
+ 186 0005 05        		.byte	5
+ 187 0006 2C        		.byte	44
+ 188 0007 11        		.byte	17
+ 189 0008 E5        		.byte	-27
+ 190 0009 00        		.byte	0
+ 191 000a 38        		.byte	56
+ 192 000b 51        		.byte	81
+ 193 000c 4F        		.byte	79
+ 194 000d 56        		.byte	86
+ 195 000e 50        		.byte	80
+ 196 000f E6        		.byte	-26
+ 197 0010 E4        		.byte	-28
+ 198 0011 E5        		.byte	-27
+ 199 0012 1D        		.byte	29
+ 200 0013 1B        		.byte	27
+ 201 0014 06        		.byte	6
+ 202 0015 19        		.byte	25
+ 203 0016 28        		.byte	40
+ 204 0017 10        		.byte	16
+ 205 0018 36        		.byte	54
+ 206 0019 37        		.byte	55
+ 207 001a 31        		.byte	49
+ 208 001b 53        		.byte	83
+ 209 001c 54        		.byte	84
+ 210 001d 55        		.byte	85
+ 211 001e C0        		.byte	-64
+ 212 001f 00        		.byte	0
+ 213 0020 00        		.byte	0
+ 214 0021 00        		.byte	0
+ 215 0022 04        		.byte	4
+ 216 0023 16        		.byte	22
+ 217 0024 07        		.byte	7
+ 218 0025 09        		.byte	9
+ 219 0026 31        		.byte	49
+ 220 0027 0D        		.byte	13
+ 221 0028 0E        		.byte	14
+ 222 0029 0F        		.byte	15
+ 223 002a 33        		.byte	51
+ 224 002b 59        		.byte	89
+ 225 002c 5A        		.byte	90
+ 226 002d 5B        		.byte	91
+ 227 002e 58        		.byte	88
+ 228 002f 00        		.byte	0
+ 229 0030 00        		.byte	0
+ 230 0031 00        		.byte	0
+ 231 0032 14        		.byte	20
+ 232 0033 1A        		.byte	26
+ 233 0034 08        		.byte	8
+ 234 0035 15        		.byte	21
+ 235 0036 31        		.byte	49
+ 236 0037 18        		.byte	24
+ 237 0038 0C        		.byte	12
+ 238 0039 12        		.byte	18
+ 239 003a 13        		.byte	19
+ 240 003b 5F        		.byte	95
+ 241 003c 60        		.byte	96
+ 242 003d 61        		.byte	97
+ 243 003e 57        		.byte	87
+ 244 003f 47        		.byte	71
+ 245 0040 00        		.byte	0
+ 246 0041 00        		.byte	0
+ 247 0042 1E        		.byte	30
+ 248 0043 1F        		.byte	31
+ 249 0044 20        		.byte	32
+ 250 0045 21        		.byte	33
+ 251 0046 43        		.byte	67
+ 252 0047 24        		.byte	36
+ 253 0048 25        		.byte	37
+ 254 0049 26        		.byte	38
+ 255 004a 27        		.byte	39
+ 256 004b 44        		.byte	68
+ 257 004c 45        		.byte	69
+ 258 004d 4E        		.byte	78
+ 259 004e 4D        		.byte	77
+ 260 004f 46        		.byte	70
+ 261 0050 E0        		.byte	-32
+ 262 0051 00        		.byte	0
+ 263 0052 35        		.byte	53
+ 264 0053 3A        		.byte	58
+ 265 0054 3B        		.byte	59
+ 266 0055 22        		.byte	34
+ 267 0056 42        		.byte	66
+ 268 0057 23        		.byte	35
+ 269 0058 2E        		.byte	46
+ 270 0059 41        		.byte	65
+ 271 005a 2D        		.byte	45
+ 272 005b 4C        		.byte	76
+ 273 005c 49        		.byte	73
+ 274 005d 4B        		.byte	75
+ 275 005e 4A        		.byte	74
+ 276 005f 00        		.byte	0
+ 277 0060 00        		.byte	0
+ 278 0061 E1        		.byte	-31
+ 279 0062 2B        		.byte	43
+ 280 0063 C1        		.byte	-63
+ 281 0064 3C        		.byte	60
+ 282 0065 17        		.byte	23
+ 283 0066 2A        		.byte	42
+ 284 0067 1C        		.byte	28
+ 285 0068 30        		.byte	48
+ 286 0069 40        		.byte	64
+ 287 006a 2F        		.byte	47
+ 288 006b 5C        		.byte	92
+ 289 006c 5D        		.byte	93
+ 290 006d 5E        		.byte	94
+ 291 006e 00        		.byte	0
+ 292 006f 00        		.byte	0
+ 293 0070 00        		.byte	0
+ 294 0071 00        		.byte	0
+ 295 0072 29        		.byte	41
+ 296 0073 64        		.byte	100
+ 297 0074 3D        		.byte	61
+ 298 0075 0A        		.byte	10
+ 299 0076 3E        		.byte	62
+ 300 0077 0B        		.byte	11
+ 301 0078 3F        		.byte	63
+ 302 0079 00        		.byte	0
+ 303 007a 34        		.byte	52
+ 304 007b 00        		.byte	0
+ 305 007c 62        		.byte	98
+ 306 007d 63        		.byte	99
+ 307 007e 52        		.byte	82
+ 308 007f E2        		.byte	-30
+ 309 0080 00        		.byte	0
+ 310 0081 00        		.byte	0
+ 311 0082 00        		.byte	0
+ 312 0083 00        		.byte	0
+ 313 0084 00        		.byte	0
+ 314 0085 01        		.byte	1
+ 315 0086 01        		.byte	1
+ 316 0087 01        		.byte	1
+ 317 0088 01        		.byte	1
+ 318 0089 00        		.byte	0
+ 319 008a 01        		.byte	1
+ 320 008b 01        		.byte	1
+ 321 008c 01        		.byte	1
+ 322 008d 00        		.byte	0
+ 323 008e 01        		.byte	1
+ 324 008f 01        		.byte	1
+ 325 0090 01        		.byte	1
+ 326 0091 01        		.byte	1
+ 327 0092 01        		.byte	1
+ 328 0093 01        		.byte	1
+ 329 0094 01        		.byte	1
+ 330 0095 01        		.byte	1
+ 331 0096 01        		.byte	1
+ 332 0097 01        		.byte	1
+ 333 0098 01        		.byte	1
+ 334 0099 01        		.byte	1
+ 335 009a 01        		.byte	1
+ 336 009b 00        		.byte	0
+ 337 009c 00        		.byte	0
+ 338 009d 00        		.byte	0
+ 339 009e 01        		.byte	1
+ 340 009f 00        		.byte	0
+ 341 00a0 00        		.byte	0
+ 342 00a1 00        		.byte	0
+ 343 00a2 01        		.byte	1
+ 344 00a3 01        		.byte	1
+ 345 00a4 01        		.byte	1
+ 346 00a5 01        		.byte	1
+ 347 00a6 01        		.byte	1
+ 348 00a7 01        		.byte	1
+ 349 00a8 01        		.byte	1
+ 350 00a9 01        		.byte	1
+ 351 00aa 01        		.byte	1
+ 352 00ab 00        		.byte	0
+ 353 00ac 00        		.byte	0
+ 354 00ad 00        		.byte	0
+ 355 00ae 00        		.byte	0
+ 356 00af 00        		.byte	0
+ 357 00b0 00        		.byte	0
+ 358 00b1 00        		.byte	0
+ 359 00b2 01        		.byte	1
+ 360 00b3 01        		.byte	1
+ 361 00b4 01        		.byte	1
+ 362 00b5 01        		.byte	1
+ 363 00b6 01        		.byte	1
+ 364 00b7 01        		.byte	1
+ 365 00b8 01        		.byte	1
+ 366 00b9 01        		.byte	1
+ 367 00ba 01        		.byte	1
+ 368 00bb AC        		.byte	-84
+ 369 00bc B0        		.byte	-80
+ 370 00bd AB        		.byte	-85
+ 371 00be 00        		.byte	0
+ 372 00bf 01        		.byte	1
+ 373 00c0 00        		.byte	0
+ 374 00c1 00        		.byte	0
+ 375 00c2 01        		.byte	1
+ 376 00c3 01        		.byte	1
+ 377 00c4 01        		.byte	1
+ 378 00c5 01        		.byte	1
+ 379 00c6 01        		.byte	1
+ 380 00c7 01        		.byte	1
+ 381 00c8 01        		.byte	1
+ 382 00c9 01        		.byte	1
+ 383 00ca 01        		.byte	1
+ 384 00cb 01        		.byte	1
+ 385 00cc 01        		.byte	1
+ 386 00cd 01        		.byte	1
+ 387 00ce 01        		.byte	1
+ 388 00cf 01        		.byte	1
+ 389 00d0 01        		.byte	1
+ 390 00d1 00        		.byte	0
+ 391 00d2 01        		.byte	1
+ 392 00d3 01        		.byte	1
+ 393 00d4 01        		.byte	1
+ 394 00d5 01        		.byte	1
+ 395 00d6 01        		.byte	1
+ 396 00d7 01        		.byte	1
+ 397 00d8 01        		.byte	1
+ 398 00d9 01        		.byte	1
+ 399 00da 01        		.byte	1
+ 400 00db 01        		.byte	1
+ 401 00dc 01        		.byte	1
+ 402 00dd 01        		.byte	1
+ 403 00de 01        		.byte	1
+ 404 00df 00        		.byte	0
+ 405 00e0 00        		.byte	0
+ 406 00e1 01        		.byte	1
+ 407 00e2 01        		.byte	1
+ 408 00e3 01        		.byte	1
+ 409 00e4 01        		.byte	1
+ 410 00e5 01        		.byte	1
+ 411 00e6 01        		.byte	1
+ 412 00e7 01        		.byte	1
+ 413 00e8 01        		.byte	1
+ 414 00e9 01        		.byte	1
+ 415 00ea 01        		.byte	1
+ 416 00eb AA        		.byte	-86
+ 417 00ec A8        		.byte	-88
+ 418 00ed A9        		.byte	-87
+ 419 00ee 00        		.byte	0
+ 420 00ef 00        		.byte	0
+ 421 00f0 00        		.byte	0
+ 422 00f1 00        		.byte	0
+ 423 00f2 01        		.byte	1
+ 424 00f3 01        		.byte	1
+ 425 00f4 01        		.byte	1
+ 426 00f5 01        		.byte	1
+ 427 00f6 01        		.byte	1
+ 428 00f7 01        		.byte	1
+ 429 00f8 01        		.byte	1
+ 430 00f9 00        		.byte	0
+ 431 00fa 01        		.byte	1
+ 432 00fb 00        		.byte	0
+ 433 00fc 00        		.byte	0
+ 434 00fd 00        		.byte	0
+ 435 00fe 01        		.byte	1
+ 436 00ff 01        		.byte	1
+ 437               		.section	.bss.lalt_ralt_mods.2110,"aw",@nobits
+ 440               	lalt_ralt_mods.2110:
+ 441 0000 00        		.zero	1
+ 442               		.text
+ 443               	.Letext0:
+ 444               		.file 2 "/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/stdint.h"
+ 445               		.file 3 "../../../../tmk_core/common/keycode.h"
+ 446               		.file 4 "../../../../tmk_core/common/keyboard.h"
+ 447               		.file 5 "../../../../tmk_core/common/action_code.h"
+ 448               		.file 6 "../../../../tmk_core/common/action.h"
+ 449               		.file 7 "../../../../tmk_core/common/bootloader.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 keymap_2.c
+     /tmp/cck75RZR.s:2      *ABS*:000000000000003e __SP_H__
+     /tmp/cck75RZR.s:3      *ABS*:000000000000003d __SP_L__
+     /tmp/cck75RZR.s:4      *ABS*:000000000000003f __SREG__
+     /tmp/cck75RZR.s:5      *ABS*:000000000000003b __RAMPZ__
+     /tmp/cck75RZR.s:6      *ABS*:0000000000000000 __tmp_reg__
+     /tmp/cck75RZR.s:7      *ABS*:0000000000000001 __zero_reg__
+     /tmp/cck75RZR.s:14     .text.action_function:0000000000000000 action_function
+     /tmp/cck75RZR.s:440    .bss.lalt_ralt_mods.2110:0000000000000000 lalt_ralt_mods.2110
+     /tmp/cck75RZR.s:173    .progmem.data.fn_actions:0000000000000000 fn_actions
+     /tmp/cck75RZR.s:180    .progmem.data.keymaps:0000000000000000 keymaps
+
+UNDEFINED SYMBOLS
+get_mods
+del_mods
+send_keyboard_report
+clear_keyboard
+bootloader_jump
+add_key
+add_mods
+del_key
+__do_clear_bss

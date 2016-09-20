@@ -143,11 +143,11 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt)
             if (record->event.pressed) {
                 if (shift_mod) {
 		    layer_invert(1); // toggle number pad layer
-		    DDR_NUMLAYER ^= (1<<BIT_NUMLAYER);	    
+		    //DDR_NUMLAYER ^= (1<<BIT_NUMLAYER);
                 } else {
                     del_mods(shift_mod); // remove shift
                     layer_invert(2); // toggle layer
-		    DDR_EXTRA_LAYER ^= (1<<BIT_EXTRA_LAYER);
+		    //DDR_EXTRA_LAYER ^= (1<<BIT_EXTRA_LAYER);
 		    // ...because, come on, who uses scroll lock...?
 		    //add_key(KC_SLCK);
                     //send_keyboard_report(); // send Scroll Lock
@@ -168,7 +168,7 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt)
             if (record->event.pressed) {
                 if (shift_mod) {
 		    layer_invert(1); // toggle number pad layer
-		    DDR_NUMLAYER ^= (1<<BIT_NUMLAYER);
+		    //DDR_NUMLAYER ^= (1<<BIT_NUMLAYER);
                 } else {
                     del_mods(shift_mod); // remove shift
                     add_key(KC_NLCK);

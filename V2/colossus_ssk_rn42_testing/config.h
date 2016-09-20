@@ -43,8 +43,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define MOUSEKEY_WHEEL_MAX_SPEED 8
 #define MOUSEKEY_WHEEL_TIME_TO_MAX 60
 
-/* Locking resynchronize hack */ 
-#define LOCKING_RESYNC_ENABLE
+/* Locking resynchronize hack #define LOCKING_RESYNC_ENABLE */ 
+
 
 
 /* key combination for magic command */

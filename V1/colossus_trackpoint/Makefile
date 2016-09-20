@@ -120,9 +120,6 @@ CONSOLE_ENABLE = yes	# Console for debug(+400)
 SLEEP_LED_ENABLE = yes  # Breathing sleep LED during USB suspend
 PS2_MOUSE_ENABLE = yes
 PS2_USE_USART = yes     # uses hardware USART engine for PS/2 signal receive(recomened)
-#NKRO_ENABLE = yes	# USB Nkey Rollover 
-
-#BLUEFRUIT_TRACE_SERIAL = true
 
 # Optimize size but this may cause error "relocation truncated to fit"
 #EXTRALDFLAGS = -Wl,--relax

@@ -62,6 +62,7 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt)
                 if (lalt_ralt_mods) {
 		    del_mods(lalt_ralt_mods);
 		    send_keyboard_report();
+		    clear_keyboard();
 		    bootloader_jump(); 
                 } else {
                     del_mods(lalt_ralt_mods); // remove shift

@@ -40,7 +40,7 @@ static void SetupHardware(void)
    
 	// RN-42 Power Mosfet
         DDRD  |= (1<<PD4);
-        PORTD &= ~(1<<PD4);
+	PORTD |= (1<<PD4); //off
 	
 	// Fast Charge NPN, inital low
         DDRE  |= (1<<PE4);
@@ -53,9 +53,14 @@ static void SetupHardware(void)
 int main(void)  __attribute__ ((weak));
 int main(void)
 {
+
     SetupHardware();
     sei();
 
+    if (!(PINB & (1<<4))) {
+	  PORTD &= ~(1<<PD4); //on
+    }
+    
     /* wait for USB startup to get ready for debug output */
     uint8_t timeout = 255;  // timeout when USB is not available(Bluetooth)
     while (timeout-- && USB_DeviceState != DEVICE_STATE_Configured) {
@@ -78,7 +83,7 @@ int main(void)
     if (!(PINB & (1<<4))) {
         host_set_driver(&rn42_driver);
     } else {
-        PORTD |= (1<<PD4);
+        PORTD |= (1<<PD4); //off
         host_set_driver(&lufa_driver);
 	      if (USB_DeviceState != DEVICE_STATE_Configured) {
 		    // USB plugged in, but not configured: assuming charger/fast charge.

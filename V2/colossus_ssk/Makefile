@@ -53,7 +53,7 @@ SRC = keymap_common.c \
 ifdef KEYMAP
     SRC := keymap_$(KEYMAP).c $(SRC)
 else
-    SRC := keymap_ssk.c $(SRC)
+    SRC := keymap.c $(SRC)
 endif
 
 CONFIG_H = config.h

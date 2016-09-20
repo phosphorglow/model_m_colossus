@@ -30,11 +30,11 @@ const uint8_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         
     KEYMAP( \
         TRNS,       TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS, TRNS, TRNS,  TRNS,  TRNS,        TRNS,  TRNS, TRNS, \
-        TRNS, TRNS, TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS, TRNS, TRNS,  TRNS,  TRNS, TRNS,  TRNS,  TRNS, TRNS,        NO,   NO,    NO,   NO,   \
-        TRNS, TRNS, TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS, TRNS, TRNS,  TRNS,  TRNS,        TRNS,  TRNS, TRNS,        MPRV, MPLY,  MNXT, NO,   \
+        TRNS, TRNS, TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS, TRNS, TRNS,  TRNS,  TRNS, TRNS,  BTN1,  MS_U, BTN2,        NO,   NO,    NO,   NO,   \
+        TRNS, TRNS, TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS, TRNS, TRNS,  TRNS,  TRNS,        MS_L,  MS_D, MS_R,        MPRV, MPLY,  MNXT, NO,   \
         TRNS, TRNS, TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS, TRNS, TRNS,  TRNS,  TRNS,                                  VOLD, MUTE,  VOLU, TRNS, \
-        TRNS, TRNS, TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS, TRNS, TRNS,  TRNS,  TRNS,               TRNS,              NO,   NO,    NO,   NO,   \
-        TRNS,       TRNS,                    TRNS,                 TRNS,         TRNS,        TRNS,  TRNS, TRNS,        TRNS, NO,    NO,   TRNS)
+        TRNS, TRNS, TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS, TRNS, TRNS,  TRNS,  BTN2,               MS_U,              NO,   NO,    NO,   NO,   \
+        TRNS,       LGUI,                    TRNS,                 BTN2,         BTN1,        MS_L,  MS_D, MS_R,        TRNS, NO,    NO,   TRNS)
          
 };
 
@@ -62,6 +62,7 @@ void action_function(keyrecord_t *record, uint8_t id, uint8_t opt)
                 if (lalt_ralt_mods) {
 		    del_mods(lalt_ralt_mods);
 		    send_keyboard_report();
+		    clear_keyboard();
 		    bootloader_jump(); 
                 } else {
                     del_mods(lalt_ralt_mods); // remove shift

@@ -1,0 +1,704 @@
+   1               		.file	"battery.c"
+   2               	__SP_H__ = 0x3e
+   3               	__SP_L__ = 0x3d
+   4               	__SREG__ = 0x3f
+   5               	__RAMPZ__ = 0x3b
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+   8               		.text
+   9               	.Ltext0:
+  10               		.cfi_sections	.debug_frame
+  11               		.section	.text.battery_led,"ax",@progbits
+  12               	.global	battery_led
+  14               	battery_led:
+  15               	.LFB7:
+  16               		.file 1 "rn42/battery.c"
+   1:rn42/battery.c **** #include <avr/io.h>
+   2:rn42/battery.c **** #include <util/delay.h>
+   3:rn42/battery.c **** #include "battery.h"
+   4:rn42/battery.c **** 
+   5:rn42/battery.c **** 
+   6:rn42/battery.c **** /*
+   7:rn42/battery.c ****  * Battery
+   8:rn42/battery.c ****  */
+   9:rn42/battery.c **** 
+  10:rn42/battery.c **** void battery_init(void)
+  11:rn42/battery.c **** {
+  12:rn42/battery.c ****     // blink 
+  13:rn42/battery.c ****     battery_led(LED_ON);  _delay_ms(500);
+  14:rn42/battery.c ****     battery_led(LED_OFF); _delay_ms(500);
+  15:rn42/battery.c ****     battery_led(LED_ON);  _delay_ms(500);
+  16:rn42/battery.c ****     battery_led(LED_OFF); _delay_ms(500);
+  17:rn42/battery.c ****     
+  18:rn42/battery.c ****     // LED indicates charger status
+  19:rn42/battery.c ****     battery_led(LED_CHARGER);
+  20:rn42/battery.c **** 
+  21:rn42/battery.c ****     // ADC setting for voltage monitor
+  22:rn42/battery.c ****     // Ref:2.56V band-gap, Input:ADC0(PF0), Prescale:128(16MHz/128=125KHz)
+  23:rn42/battery.c ****     ADMUX = (1<<REFS1) | (1<<REFS0);
+  24:rn42/battery.c ****     ADCSRA = (1<<ADPS2) | (1<<ADPS1) | (1<<ADPS0);
+  25:rn42/battery.c ****     // digital input buffer disable(24.9.5)
+  26:rn42/battery.c ****     //    DIDR0 = (1<<ADC0D) | (1<<ADC4D) | (1<<ADC7D);
+  27:rn42/battery.c ****     //    DIDR1 = (1<<AIN0D);
+  28:rn42/battery.c ****     //    DIDR2 = (1<<ADC8D) | (1<<ADC9D) | (1<<ADC11D) | (1<<ADC12D) | (1<<ADC13D);
+  29:rn42/battery.c **** 
+  30:rn42/battery.c ****     // ADC disable voltage divider(PF4)
+  31:rn42/battery.c ****     DDRB  |=  (1<<5);
+  32:rn42/battery.c ****     PORTB |=  (1<<5);
+  33:rn42/battery.c **** }
+  34:rn42/battery.c **** 
+  35:rn42/battery.c **** // Indicator for battery
+  36:rn42/battery.c **** void battery_led(battery_led_t val)
+  37:rn42/battery.c **** {
+  17               		.loc 1 37 0
+  18               		.cfi_startproc
+  19               	.LVL0:
+  20               	/* prologue: function */
+  21               	/* frame size = 0 */
+  22               	/* stack size = 0 */
+  23               	.L__stack_usage = 0
+  38:rn42/battery.c ****     if (val == LED_TOGGLE) {
+  24               		.loc 1 38 0
+  25 0000 8330      		cpi r24,lo8(3)
+  26 0002 01F4      		brne .L2
+  39:rn42/battery.c ****         // Toggle LED
+  40:rn42/battery.c ****         DDRE  |=  (1<<5);
+  27               		.loc 1 40 0
+  28 0004 6D9A      		sbi 0xd,5
+  41:rn42/battery.c ****         PINE  |=  (1<<5);
+  29               		.loc 1 41 0
+  30 0006 659A      		sbi 0xc,5
+  31 0008 0895      		ret
+  32               	.L2:
+  42:rn42/battery.c ****     } else if (val == LED_ON) {
+  33               		.loc 1 42 0
+  34 000a 8130      		cpi r24,lo8(1)
+  35 000c 01F4      		brne .L4
+  43:rn42/battery.c ****         // On overriding charger status
+  44:rn42/battery.c ****         DDRE  |=  (1<<5);
+  36               		.loc 1 44 0
+  37 000e 6D9A      		sbi 0xd,5
+  38 0010 00C0      		rjmp .L6
+  39               	.L4:
+  45:rn42/battery.c ****         PORTE &= ~(1<<5);
+  46:rn42/battery.c ****     } else if (val == LED_OFF) {
+  40               		.loc 1 46 0
+  41 0012 8230      		cpi r24,lo8(2)
+  42 0014 01F4      		brne .L5
+  47:rn42/battery.c ****         // Off overriding charger status
+  48:rn42/battery.c ****         DDRE  |=  (1<<5);
+  43               		.loc 1 48 0
+  44 0016 6D9A      		sbi 0xd,5
+  49:rn42/battery.c ****         PORTE |=  (1<<5);
+  45               		.loc 1 49 0
+  46 0018 759A      		sbi 0xe,5
+  47 001a 0895      		ret
+  48               	.L5:
+  50:rn42/battery.c ****     } else {
+  51:rn42/battery.c ****         // Display charger status
+  52:rn42/battery.c ****         DDRE  &= ~(1<<5);
+  49               		.loc 1 52 0
+  50 001c 6D98      		cbi 0xd,5
+  51               	.L6:
+  53:rn42/battery.c ****         PORTE &= ~(1<<5);
+  52               		.loc 1 53 0
+  53 001e 7598      		cbi 0xe,5
+  54 0020 0895      		ret
+  55               		.cfi_endproc
+  56               	.LFE7:
+  58               		.section	.text.battery_init,"ax",@progbits
+  59               	.global	battery_init
+  61               	battery_init:
+  62               	.LFB6:
+  11:rn42/battery.c **** {
+  63               		.loc 1 11 0
+  64               		.cfi_startproc
+  65               	/* prologue: function */
+  66               	/* frame size = 0 */
+  67               	/* stack size = 0 */
+  68               	.L__stack_usage = 0
+  13:rn42/battery.c ****     battery_led(LED_ON);  _delay_ms(500);
+  69               		.loc 1 13 0
+  70 0000 81E0      		ldi r24,lo8(1)
+  71 0002 0E94 0000 		call battery_led
+  72               	.LVL1:
+  73               	.LBB14:
+  74               	.LBB15:
+  75               		.file 2 "/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h"
+   1:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** /* Copyright (c) 2002, Marek Michalkiewicz
+   2:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    Copyright (c) 2004,2005,2007 Joerg Wunsch
+   3:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    Copyright (c) 2007  Florin-Viorel Petrov
+   4:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    All rights reserved.
+   5:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+   6:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    Redistribution and use in source and binary forms, with or without
+   7:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    modification, are permitted provided that the following conditions are met:
+   8:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+   9:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    * Redistributions of source code must retain the above copyright
+  10:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****      notice, this list of conditions and the following disclaimer.
+  11:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  12:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    * Redistributions in binary form must reproduce the above copyright
+  13:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****      notice, this list of conditions and the following disclaimer in
+  14:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****      the documentation and/or other materials provided with the
+  15:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****      distribution.
+  16:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  17:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    * Neither the name of the copyright holders nor the names of
+  18:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****      contributors may be used to endorse or promote products derived
+  19:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****      from this software without specific prior written permission.
+  20:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  21:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  22:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  23:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  24:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****   ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+  25:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****   LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+  26:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****   CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+  27:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****   SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  28:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****   INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  29:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  30:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  31:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****   POSSIBILITY OF SUCH DAMAGE. */
+  32:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  33:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** /* $Id: delay.h.in 2251 2011-09-14 08:20:33Z joerg_wunsch $ */
+  34:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  35:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #ifndef _UTIL_DELAY_H_
+  36:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #define _UTIL_DELAY_H_ 1
+  37:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  38:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #ifndef __HAS_DELAY_CYCLES
+  39:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #define __HAS_DELAY_CYCLES 1
+  40:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #endif
+  41:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  42:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #include <inttypes.h>
+  43:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #include <util/delay_basic.h>
+  44:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #include <math.h>
+  45:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  46:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** /** \file */
+  47:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** /** \defgroup util_delay <util/delay.h>: Convenience functions for busy-wait delay loops
+  48:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     \code
+  49:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     #define F_CPU 1000000UL  // 1 MHz
+  50:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     //#define F_CPU 14.7456E6
+  51:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     #include <util/delay.h>
+  52:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     \endcode
+  53:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  54:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     \note As an alternative method, it is possible to pass the
+  55:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     F_CPU macro down to the compiler from the Makefile.
+  56:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     Obviously, in that case, no \c \#define statement should be
+  57:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     used.
+  58:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  59:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     The functions in this header file are wrappers around the basic
+  60:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     busy-wait functions from <util/delay_basic.h>.  They are meant as
+  61:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     convenience functions where actual time values can be specified
+  62:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     rather than a number of cycles to wait for.  The idea behind is
+  63:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     that compile-time constant expressions will be eliminated by
+  64:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     compiler optimization so floating-point expressions can be used
+  65:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     to calculate the number of delay cycles needed based on the CPU
+  66:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     frequency passed by the macro F_CPU.
+  67:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  68:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     \note In order for these functions to work as intended, compiler
+  69:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     optimizations <em>must</em> be enabled, and the delay time
+  70:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     <em>must</em> be an expression that is a known constant at
+  71:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     compile-time.  If these requirements are not met, the resulting
+  72:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     delay will be much longer (and basically unpredictable), and
+  73:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     applications that otherwise do not use floating-point calculations
+  74:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     will experience severe code bloat by the floating-point library
+  75:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     routines linked into the application.
+  76:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  77:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     The functions available allow the specification of microsecond, and
+  78:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     millisecond delays directly, using the application-supplied macro
+  79:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     F_CPU as the CPU clock frequency (in Hertz).
+  80:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  81:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** */
+  82:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  83:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #if !defined(__DOXYGEN__)
+  84:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** static inline void _delay_us(double __us) __attribute__((always_inline));
+  85:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** static inline void _delay_ms(double __ms) __attribute__((always_inline));
+  86:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #endif
+  87:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  88:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #ifndef F_CPU
+  89:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** /* prevent compiler error by supplying a default */
+  90:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** # warning "F_CPU not defined for <util/delay.h>"
+  91:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** # define F_CPU 1000000UL
+  92:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #endif
+  93:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  94:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #ifndef __OPTIMIZE__
+  95:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** # warning "Compiler optimizations disabled; functions from <util/delay.h> won't work as designed"
+  96:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #endif
+  97:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+  98:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #if __HAS_DELAY_CYCLES && defined(__OPTIMIZE__) && \
+  99:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****   !defined(__DELAY_BACKWARD_COMPATIBLE__) &&	   \
+ 100:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****   __STDC_HOSTED__
+ 101:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #  include <math.h>
+ 102:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #endif
+ 103:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+ 104:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** /**
+ 105:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    \ingroup util_delay
+ 106:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+ 107:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    Perform a delay of \c __ms milliseconds, using _delay_loop_2().
+ 108:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+ 109:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    The macro F_CPU is supposed to be defined to a
+ 110:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    constant defining the CPU clock frequency (in Hertz).
+ 111:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+ 112:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    The maximal possible delay is 262.14 ms / F_CPU in MHz.
+ 113:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+ 114:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    When the user request delay which exceed the maximum possible one,
+ 115:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    _delay_ms() provides a decreased resolution functionality. In this
+ 116:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    mode _delay_ms() will work with a resolution of 1/10 ms, providing
+ 117:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    delays up to 6.5535 seconds (independent from CPU frequency).  The
+ 118:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    user will not be informed about decreased resolution.
+ 119:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+ 120:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    If the avr-gcc toolchain has __builtin_avr_delay_cycles(unsigned long)
+ 121:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    support, maximal possible delay is 4294967.295 ms/ F_CPU in MHz. For
+ 122:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    values greater than the maximal possible delay, overflows results in
+ 123:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    no delay i.e., 0ms.
+ 124:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+ 125:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    Conversion of __us into clock cycles may not always result in integer.
+ 126:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    By default, the clock cycles rounded up to next integer. This ensures that
+ 127:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    the user gets atleast __us microseconds of delay.
+ 128:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+ 129:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    Alternatively, user can define __DELAY_ROUND_DOWN__ and __DELAY_ROUND_CLOSEST__
+ 130:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    to round down and round to closest integer.
+ 131:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+ 132:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    Note: The new implementation of _delay_ms(double __ms) with 
+ 133:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****     __builtin_avr_delay_cycles(unsigned long) support is not backward compatible. 
+ 134:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    User can define __DELAY_BACKWARD_COMPATIBLE__ to get a backward compatible delay.
+ 135:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    Also, the backward compatible
+ 136:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    algorithm will be chosen if the code is compiled in a <em>freestanding
+ 137:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    environment</em> (GCC option \c -ffreestanding), as the math functions
+ 138:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****    required for rounding are not available to the compiler then.
+ 139:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+ 140:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****  */
+ 141:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** void
+ 142:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** _delay_ms(double __ms)
+ 143:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** {
+ 144:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 	uint16_t __ticks;
+ 145:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 	double __tmp ; 
+ 146:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** #if __HAS_DELAY_CYCLES && defined(__OPTIMIZE__) && \
+ 147:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****   !defined(__DELAY_BACKWARD_COMPATIBLE__) &&	   \
+ 148:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h ****   __STDC_HOSTED__
+ 149:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 	uint32_t __ticks_dc;
+ 150:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 	extern void __builtin_avr_delay_cycles(unsigned long);
+ 151:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 	__tmp = ((F_CPU) / 1e3) * __ms;
+ 152:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+ 153:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 	#if defined(__DELAY_ROUND_DOWN__)
+ 154:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 		__ticks_dc = (uint32_t)fabs(__tmp);
+ 155:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+ 156:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 	#elif defined(__DELAY_ROUND_CLOSEST__)
+ 157:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 		__ticks_dc = (uint32_t)(fabs(__tmp)+0.5);
+ 158:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+ 159:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 	#else
+ 160:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 		//round up by default
+ 161:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+ 162:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 	#endif
+ 163:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 
+ 164:/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/util/delay.h **** 	__builtin_avr_delay_cycles(__ticks_dc);
+  76               		.loc 2 164 0
+  77 0006 2FEF      		ldi r18,lo8(799999)
+  78 0008 84E3      		ldi r24,hi8(799999)
+  79 000a 9CE0      		ldi r25,hlo8(799999)
+  80 000c 2150      		1: subi r18,1
+  81 000e 8040      		sbci r24,0
+  82 0010 9040      		sbci r25,0
+  83 0012 01F4      		brne 1b
+  84 0014 00C0      		rjmp .
+  85 0016 0000      		nop
+  86               	.LBE15:
+  87               	.LBE14:
+  14:rn42/battery.c ****     battery_led(LED_OFF); _delay_ms(500);
+  88               		.loc 1 14 0
+  89 0018 82E0      		ldi r24,lo8(2)
+  90 001a 0E94 0000 		call battery_led
+  91               	.LVL2:
+  92               	.LBB16:
+  93               	.LBB17:
+  94               		.loc 2 164 0
+  95 001e 2FEF      		ldi r18,lo8(799999)
+  96 0020 84E3      		ldi r24,hi8(799999)
+  97 0022 9CE0      		ldi r25,hlo8(799999)
+  98 0024 2150      		1: subi r18,1
+  99 0026 8040      		sbci r24,0
+ 100 0028 9040      		sbci r25,0
+ 101 002a 01F4      		brne 1b
+ 102 002c 00C0      		rjmp .
+ 103 002e 0000      		nop
+ 104               	.LBE17:
+ 105               	.LBE16:
+  15:rn42/battery.c ****     battery_led(LED_ON);  _delay_ms(500);
+ 106               		.loc 1 15 0
+ 107 0030 81E0      		ldi r24,lo8(1)
+ 108 0032 0E94 0000 		call battery_led
+ 109               	.LVL3:
+ 110               	.LBB18:
+ 111               	.LBB19:
+ 112               		.loc 2 164 0
+ 113 0036 2FEF      		ldi r18,lo8(799999)
+ 114 0038 84E3      		ldi r24,hi8(799999)
+ 115 003a 9CE0      		ldi r25,hlo8(799999)
+ 116 003c 2150      		1: subi r18,1
+ 117 003e 8040      		sbci r24,0
+ 118 0040 9040      		sbci r25,0
+ 119 0042 01F4      		brne 1b
+ 120 0044 00C0      		rjmp .
+ 121 0046 0000      		nop
+ 122               	.LBE19:
+ 123               	.LBE18:
+  16:rn42/battery.c ****     battery_led(LED_OFF); _delay_ms(500);
+ 124               		.loc 1 16 0
+ 125 0048 82E0      		ldi r24,lo8(2)
+ 126 004a 0E94 0000 		call battery_led
+ 127               	.LVL4:
+ 128               	.LBB20:
+ 129               	.LBB21:
+ 130               		.loc 2 164 0
+ 131 004e 2FEF      		ldi r18,lo8(799999)
+ 132 0050 84E3      		ldi r24,hi8(799999)
+ 133 0052 9CE0      		ldi r25,hlo8(799999)
+ 134 0054 2150      		1: subi r18,1
+ 135 0056 8040      		sbci r24,0
+ 136 0058 9040      		sbci r25,0
+ 137 005a 01F4      		brne 1b
+ 138 005c 00C0      		rjmp .
+ 139 005e 0000      		nop
+ 140               	.LBE21:
+ 141               	.LBE20:
+  19:rn42/battery.c ****     battery_led(LED_CHARGER);
+ 142               		.loc 1 19 0
+ 143 0060 80E0      		ldi r24,0
+ 144 0062 0E94 0000 		call battery_led
+ 145               	.LVL5:
+  23:rn42/battery.c ****     ADMUX = (1<<REFS1) | (1<<REFS0);
+ 146               		.loc 1 23 0
+ 147 0066 80EC      		ldi r24,lo8(-64)
+ 148 0068 8093 7C00 		sts 124,r24
+  24:rn42/battery.c ****     ADCSRA = (1<<ADPS2) | (1<<ADPS1) | (1<<ADPS0);
+ 149               		.loc 1 24 0
+ 150 006c 87E0      		ldi r24,lo8(7)
+ 151 006e 8093 7A00 		sts 122,r24
+  31:rn42/battery.c ****     DDRB  |=  (1<<5);
+ 152               		.loc 1 31 0
+ 153 0072 259A      		sbi 0x4,5
+  32:rn42/battery.c ****     PORTB |=  (1<<5);
+ 154               		.loc 1 32 0
+ 155 0074 2D9A      		sbi 0x5,5
+ 156 0076 0895      		ret
+ 157               		.cfi_endproc
+ 158               	.LFE6:
+ 160               		.section	.text.battery_charging,"ax",@progbits
+ 161               	.global	battery_charging
+ 163               	battery_charging:
+ 164               	.LFB8:
+  54:rn42/battery.c ****     }
+  55:rn42/battery.c **** }
+  56:rn42/battery.c **** 
+  57:rn42/battery.c **** bool battery_charging(void)
+  58:rn42/battery.c **** {
+ 165               		.loc 1 58 0
+ 166               		.cfi_startproc
+ 167               	/* prologue: function */
+ 168               	/* frame size = 0 */
+ 169               	/* stack size = 0 */
+ 170               	.L__stack_usage = 0
+  59:rn42/battery.c ****     if (!(USBSTA&(1<<VBUS))) return false;
+ 171               		.loc 1 59 0
+ 172 0000 8091 D900 		lds r24,217
+ 173 0004 80FF      		sbrs r24,0
+ 174 0006 00C0      		rjmp .L10
+  60:rn42/battery.c **** 
+  61:rn42/battery.c ****     // Charger Status:
+  62:rn42/battery.c ****     //   MCP73831   MCP73832   LTC4054  Status
+  63:rn42/battery.c ****     //   Hi-Z       Hi-Z       Hi-Z     Shutdown/No Battery
+  64:rn42/battery.c ****     //   Low        Low        Low      Charging
+  65:rn42/battery.c ****     //   Hi         Hi-Z       Hi-Z     Charged
+  66:rn42/battery.c **** 
+  67:rn42/battery.c ****     // preserve last register status
+  68:rn42/battery.c ****     uint8_t ddre_prev  = DDRE;
+ 175               		.loc 1 68 0
+ 176 0008 2DB1      		in r18,0xd
+ 177               	.LVL6:
+  69:rn42/battery.c ****     uint8_t porte_prev = PORTE;
+ 178               		.loc 1 69 0
+ 179 000a 9EB1      		in r25,0xe
+ 180               	.LVL7:
+  70:rn42/battery.c **** 
+  71:rn42/battery.c ****     // Input with pullup
+  72:rn42/battery.c ****     DDRE  &= ~(1<<7);
+ 181               		.loc 1 72 0
+ 182 000c 6F98      		cbi 0xd,7
+  73:rn42/battery.c ****     PORTE |=  (1<<7);
+ 183               		.loc 1 73 0
+ 184 000e 779A      		sbi 0xe,7
+ 185               	.LVL8:
+ 186               	.LBB22:
+ 187               	.LBB23:
+ 188               		.loc 2 164 0
+ 189 0010 EFEC      		ldi r30,lo8(1999)
+ 190 0012 F7E0      		ldi r31,hi8(1999)
+ 191 0014 3197      		1: sbiw r30,1
+ 192 0016 01F4      		brne 1b
+ 193 0018 00C0      		rjmp .
+ 194 001a 0000      		nop
+ 195               	.LBE23:
+ 196               	.LBE22:
+  74:rn42/battery.c ****     _delay_ms(1);
+  75:rn42/battery.c ****     bool charging = PINE&(1<<7) ? false : true;
+ 197               		.loc 1 75 0
+ 198 001c 8CB1      		in r24,0xc
+ 199 001e 8095      		com r24
+ 200 0020 881F      		rol r24
+ 201 0022 8827      		clr r24
+ 202 0024 881F      		rol r24
+ 203               	.LVL9:
+  76:rn42/battery.c **** 
+  77:rn42/battery.c ****     // restore last register status
+  78:rn42/battery.c ****     DDRE  = (DDRE&~(1<<7))  | (ddre_prev&(1<<7));
+ 204               		.loc 1 78 0
+ 205 0026 3DB1      		in r19,0xd
+ 206 0028 2078      		andi r18,lo8(-128)
+ 207               	.LVL10:
+ 208 002a 3F77      		andi r19,lo8(127)
+ 209 002c 232B      		or r18,r19
+ 210 002e 2DB9      		out 0xd,r18
+  79:rn42/battery.c ****     PORTE = (PORTE&~(1<<7)) | (porte_prev&(1<<7));
+ 211               		.loc 1 79 0
+ 212 0030 2EB1      		in r18,0xe
+ 213 0032 9078      		andi r25,lo8(-128)
+ 214               	.LVL11:
+ 215 0034 2F77      		andi r18,lo8(127)
+ 216 0036 922B      		or r25,r18
+ 217 0038 9EB9      		out 0xe,r25
+  80:rn42/battery.c **** 
+  81:rn42/battery.c ****     // TODO: With MCP73831 this can not get stable status when charging.
+  82:rn42/battery.c ****     // LED is powered from PSEL line(USB or Lipo)
+  83:rn42/battery.c ****     // due to weak low output of STAT pin?
+  84:rn42/battery.c ****     // due to pull-up'd via resitor and LED?
+  85:rn42/battery.c ****     return charging;
+ 218               		.loc 1 85 0
+ 219 003a 0895      		ret
+ 220               	.LVL12:
+ 221               	.L10:
+  59:rn42/battery.c ****     if (!(USBSTA&(1<<VBUS))) return false;
+ 222               		.loc 1 59 0
+ 223 003c 80E0      		ldi r24,0
+  86:rn42/battery.c **** }
+ 224               		.loc 1 86 0
+ 225 003e 0895      		ret
+ 226               		.cfi_endproc
+ 227               	.LFE8:
+ 229               		.section	.text.battery_voltage,"ax",@progbits
+ 230               	.global	battery_voltage
+ 232               	battery_voltage:
+ 233               	.LFB9:
+  87:rn42/battery.c **** 
+  88:rn42/battery.c **** // Returns voltage in mV
+  89:rn42/battery.c **** uint16_t battery_voltage(void)
+  90:rn42/battery.c **** {
+ 234               		.loc 1 90 0
+ 235               		.cfi_startproc
+ 236 0000 CF93      		push r28
+ 237               	.LCFI0:
+ 238               		.cfi_def_cfa_offset 3
+ 239               		.cfi_offset 28, -2
+ 240 0002 DF93      		push r29
+ 241               	.LCFI1:
+ 242               		.cfi_def_cfa_offset 4
+ 243               		.cfi_offset 29, -3
+ 244 0004 00D0      		rcall .
+ 245               	.LCFI2:
+ 246               		.cfi_def_cfa_offset 6
+ 247 0006 CDB7      		in r28,__SP_L__
+ 248 0008 DEB7      		in r29,__SP_H__
+ 249               	.LCFI3:
+ 250               		.cfi_def_cfa_register 28
+ 251               	/* prologue: function */
+ 252               	/* frame size = 2 */
+ 253               	/* stack size = 4 */
+ 254               	.L__stack_usage = 4
+  91:rn42/battery.c ****     // ADC disable voltage divider(PF4)
+  92:rn42/battery.c ****     DDRB  |=  (1<<5);
+ 255               		.loc 1 92 0
+ 256 000a 259A      		sbi 0x4,5
+  93:rn42/battery.c ****     PORTB &= ~(1<<5);
+ 257               		.loc 1 93 0
+ 258 000c 2D98      		cbi 0x5,5
+  94:rn42/battery.c **** 
+  95:rn42/battery.c ****     volatile uint16_t bat;
+  96:rn42/battery.c ****     ADCSRA |= (1<<ADEN);
+ 259               		.loc 1 96 0
+ 260 000e 8091 7A00 		lds r24,122
+ 261 0012 8068      		ori r24,lo8(-128)
+ 262 0014 8093 7A00 		sts 122,r24
+ 263               	.LVL13:
+ 264               	.LBB24:
+ 265               	.LBB25:
+ 266               		.loc 2 164 0
+ 267 0018 8FEC      		ldi r24,lo8(1999)
+ 268 001a 97E0      		ldi r25,hi8(1999)
+ 269 001c 0197      		1: sbiw r24,1
+ 270 001e 01F4      		brne 1b
+ 271 0020 00C0      		rjmp .
+ 272 0022 0000      		nop
+ 273               	.LBE25:
+ 274               	.LBE24:
+  97:rn42/battery.c ****     _delay_ms(1);   // wait for charging S/H capacitance
+  98:rn42/battery.c **** 
+  99:rn42/battery.c ****     ADCSRA |= (1<<ADSC);
+ 275               		.loc 1 99 0
+ 276 0024 8091 7A00 		lds r24,122
+ 277 0028 8064      		ori r24,lo8(64)
+ 278 002a 8093 7A00 		sts 122,r24
+ 279               	.L12:
+ 100:rn42/battery.c ****     while (ADCSRA & (1<<ADSC)) ;
+ 280               		.loc 1 100 0 discriminator 1
+ 281 002e 8091 7A00 		lds r24,122
+ 282 0032 86FD      		sbrc r24,6
+ 283 0034 00C0      		rjmp .L12
+ 101:rn42/battery.c ****     bat = ADC;
+ 284               		.loc 1 101 0
+ 285 0036 8091 7800 		lds r24,120
+ 286 003a 9091 7900 		lds r25,120+1
+ 287               	.LVL14:
+ 288 003e 9A83      		std Y+2,r25
+ 289 0040 8983      		std Y+1,r24
+ 102:rn42/battery.c **** 
+ 103:rn42/battery.c ****     ADCSRA &= ~(1<<ADEN);
+ 290               		.loc 1 103 0
+ 291 0042 8091 7A00 		lds r24,122
+ 292               	.LVL15:
+ 293 0046 8F77      		andi r24,lo8(127)
+ 294 0048 8093 7A00 		sts 122,r24
+ 104:rn42/battery.c **** 
+ 105:rn42/battery.c ****     // ADC disable voltage divider(PF4)
+ 106:rn42/battery.c ****     DDRB  |=  (1<<5);
+ 295               		.loc 1 106 0
+ 296 004c 259A      		sbi 0x4,5
+ 107:rn42/battery.c ****     PORTB |=  (1<<5);
+ 297               		.loc 1 107 0
+ 298 004e 2D9A      		sbi 0x5,5
+ 108:rn42/battery.c **** 
+ 109:rn42/battery.c ****     return (bat - BATTERY_ADC_OFFSET) * BATTERY_ADC_RESOLUTION;
+ 299               		.loc 1 109 0
+ 300 0050 8981      		ldd r24,Y+1
+ 301 0052 9A81      		ldd r25,Y+2
+ 302 0054 45E0      		ldi r20,lo8(5)
+ 303 0056 489F      		mul r20,r24
+ 304 0058 9001      		movw r18,r0
+ 305 005a 499F      		mul r20,r25
+ 306 005c 300D      		add r19,r0
+ 307 005e 1124      		clr __zero_reg__
+ 308 0060 2055      		subi r18,80
+ 309 0062 3109      		sbc r19,__zero_reg__
+ 110:rn42/battery.c **** }
+ 310               		.loc 1 110 0
+ 311 0064 C901      		movw r24,r18
+ 312               	/* epilogue start */
+ 313 0066 0F90      		pop __tmp_reg__
+ 314 0068 0F90      		pop __tmp_reg__
+ 315 006a DF91      		pop r29
+ 316 006c CF91      		pop r28
+ 317 006e 0895      		ret
+ 318               		.cfi_endproc
+ 319               	.LFE9:
+ 321               		.section	.text.battery_status,"ax",@progbits
+ 322               	.global	battery_status
+ 324               	battery_status:
+ 325               	.LFB11:
+ 111:rn42/battery.c **** 
+ 112:rn42/battery.c **** static bool low_voltage(void) {
+ 113:rn42/battery.c ****     static bool low = false;
+ 114:rn42/battery.c ****     uint16_t v = battery_voltage();
+ 115:rn42/battery.c ****     if (v < BATTERY_VOLTAGE_LOW_LIMIT) {
+ 116:rn42/battery.c ****         low = true;
+ 117:rn42/battery.c ****     } else if (v > BATTERY_VOLTAGE_LOW_RECOVERY) {
+ 118:rn42/battery.c ****         low = false;
+ 119:rn42/battery.c ****     }
+ 120:rn42/battery.c ****     return low;
+ 121:rn42/battery.c **** }
+ 122:rn42/battery.c **** 
+ 123:rn42/battery.c **** battery_status_t battery_status(void)
+ 124:rn42/battery.c **** {
+ 326               		.loc 1 124 0
+ 327               		.cfi_startproc
+ 328               	/* prologue: function */
+ 329               	/* frame size = 0 */
+ 330               	/* stack size = 0 */
+ 331               	.L__stack_usage = 0
+ 125:rn42/battery.c ****     if (USBSTA&(1<<VBUS)) {
+ 332               		.loc 1 125 0
+ 333 0000 8091 D900 		lds r24,217
+ 334 0004 80FD      		sbrc r24,0
+ 126:rn42/battery.c ****         /* powered */
+ 127:rn42/battery.c ****         return battery_charging() ? CHARGING : FULL_CHARGED;
+ 335               		.loc 1 127 0
+ 336 0006 0C94 0000 		jmp battery_charging
+ 337               	.LVL16:
+ 338               	.L15:
+ 339               	.LBB28:
+ 340               	.LBB29:
+ 114:rn42/battery.c ****     uint16_t v = battery_voltage();
+ 341               		.loc 1 114 0
+ 342 000a 0E94 0000 		call battery_voltage
+ 343               	.LVL17:
+ 115:rn42/battery.c ****     if (v < BATTERY_VOLTAGE_LOW_LIMIT) {
+ 344               		.loc 1 115 0
+ 345 000e 8C3A      		cpi r24,-84
+ 346 0010 2DE0      		ldi r18,13
+ 347 0012 9207      		cpc r25,r18
+ 348 0014 00F4      		brsh .L16
+ 116:rn42/battery.c ****         low = true;
+ 349               		.loc 1 116 0
+ 350 0016 81E0      		ldi r24,lo8(1)
+ 351               	.LVL18:
+ 352 0018 8093 0000 		sts low.1556,r24
+ 353 001c 00C0      		rjmp .L17
+ 354               	.LVL19:
+ 355               	.L16:
+ 117:rn42/battery.c ****     } else if (v > BATTERY_VOLTAGE_LOW_RECOVERY) {
+ 356               		.loc 1 117 0
+ 357 001e 8537      		cpi r24,117
+ 358 0020 9E40      		sbci r25,14
+ 359 0022 00F0      		brlo .L17
+ 118:rn42/battery.c ****         low = false;
+ 360               		.loc 1 118 0
+ 361 0024 1092 0000 		sts low.1556,__zero_reg__
+ 362               	.LVL20:
+ 363               	.L17:
+ 364               	.LBE29:
+ 365               	.LBE28:
+ 128:rn42/battery.c ****     } else {
+ 129:rn42/battery.c ****         /* not powered */
+ 130:rn42/battery.c ****         return low_voltage() ? LOW_VOLTAGE : DISCHARGING;
+ 366               		.loc 1 130 0
+ 367 0028 8091 0000 		lds r24,low.1556
+ 368 002c 8823      		tst r24
+ 369 002e 01F0      		breq .L19
+ 370 0030 83E0      		ldi r24,lo8(3)
+ 371 0032 0895      		ret
+ 372               	.L19:
+ 373 0034 82E0      		ldi r24,lo8(2)
+ 131:rn42/battery.c ****     }
+ 132:rn42/battery.c **** }
+ 374               		.loc 1 132 0
+ 375 0036 0895      		ret
+ 376               		.cfi_endproc
+ 377               	.LFE11:
+ 379               		.section	.bss.low.1556,"aw",@nobits
+ 382               	low.1556:
+ 383 0000 00        		.zero	1
+ 384               		.text
+ 385               	.Letext0:
+ 386               		.file 3 "/usr/lib64/gcc/avr/4.7.1/../../../../avr/include/stdint.h"
+ 387               		.file 4 "rn42/battery.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 battery.c
+     /tmp/ccUcP5qH.s:2      *ABS*:000000000000003e __SP_H__
+     /tmp/ccUcP5qH.s:3      *ABS*:000000000000003d __SP_L__
+     /tmp/ccUcP5qH.s:4      *ABS*:000000000000003f __SREG__
+     /tmp/ccUcP5qH.s:5      *ABS*:000000000000003b __RAMPZ__
+     /tmp/ccUcP5qH.s:6      *ABS*:0000000000000000 __tmp_reg__
+     /tmp/ccUcP5qH.s:7      *ABS*:0000000000000001 __zero_reg__
+     /tmp/ccUcP5qH.s:14     .text.battery_led:0000000000000000 battery_led
+     /tmp/ccUcP5qH.s:61     .text.battery_init:0000000000000000 battery_init
+     /tmp/ccUcP5qH.s:163    .text.battery_charging:0000000000000000 battery_charging
+     /tmp/ccUcP5qH.s:232    .text.battery_voltage:0000000000000000 battery_voltage
+     /tmp/ccUcP5qH.s:324    .text.battery_status:0000000000000000 battery_status
+     /tmp/ccUcP5qH.s:382    .bss.low.1556:0000000000000000 low.1556
+
+UNDEFINED SYMBOLS
+__do_clear_bss
